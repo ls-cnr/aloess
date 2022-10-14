@@ -72,24 +72,3 @@ class MTLBuilder {
   def until(arg_left : LogicFormula with MTLNature,arg_right : LogicFormula with MTLNature, interval: MetricInterval): LogicFormula with MTLNature = MetricUntil(arg_left,arg_left,interval)
   def release(arg_left : LogicFormula with MTLNature,arg_right : LogicFormula with MTLNature, interval: MetricInterval) :LogicFormula with MTLNature = MetricRelease(arg_left,arg_left,interval)
 }
-
-//class MTLBuilder {
-//  def proposition(functional:String, terms: List[ConstantTerm]) : MTLFormula = GroundPredicate(functional,terms)
-//  def truth : LTLFormula = True()
-//  def falsity : LTLFormula = False()
-//  def not(arg : LTLFormula) : LTLFormula = Negation(arg)
-//  def and(arg_left : LTLFormula,arg_right : LTLFormula) : LTLFormula = Conjunction(List(arg_left,arg_right))
-//  def or(arg_left : LTLFormula,arg_right : LTLFormula) : LTLFormula = Disjunction(List(arg_left,arg_right))
-//  def xor(arg_left : LTLFormula,arg_right : LTLFormula) : LTLFormula = ExclDisj(List(arg_left,arg_right))
-//  def implies(arg_left : LTLFormula,arg_right : LTLFormula) : LTLFormula = Implication(List(arg_left,arg_right))
-//  def biimpl(arg_left : LTLFormula,arg_right : LTLFormula) : LTLFormula = BiImplication(List(arg_left,arg_right))
-//
-//  def predicate(functional:String, terms: List[Term]) : LTLFormula = Predicate(functional,terms)
-//  def exists(variable: VariableTerm, formula : LTLFormula) : LTLFormula = ExistQuantifier(variable,formula)
-//  def foreach(variable: VariableTerm, formula : LTLFormula) : LTLFormula = UnivQuantifier(variable,formula)
-//
-//  def globally(formula : LTLFormula, interval: MetricInterval) = MetricGlobally(formula,interval)
-//  def finally_(formula : LTLFormula, interval: MetricInterval) = MetricFinally(formula,interval)
-//  def until(arg_left : LTLFormula,arg_right : LTLFormula, interval: MetricInterval) = MetricUntil(arg_left,arg_left,interval)
-//  def release(arg_left : LTLFormula,arg_right : LTLFormula, interval: MetricInterval) = MetricRelease(arg_left,arg_left,interval)
-//}

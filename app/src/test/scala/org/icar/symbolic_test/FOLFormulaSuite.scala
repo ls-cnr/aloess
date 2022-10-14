@@ -25,4 +25,26 @@ class FOLFormulaSuite extends AnyFunSuite {
     assert(formula == UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer")))))
   }
 
+  test("predicate translates to proposition") {
+    val b = new FOLBuilder
+    val formula = b.predicate("test",List(VariableTerm("integer")))
+    val predicate = formula.asInstanceOf[Predicate]
+    assert (!predicate.isGround)
+
+    val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
+    val proposition = predicate.to_ground(assign_map)
+    assert(proposition == GroundPredicate("test", List(NumeralTerm(10))))
+  }
+
+  test("predicate translation throws exceptions when not grounded") {
+    val b = new FOLBuilder
+    val formula = b.predicate("test",List(VariableTerm("integer")))
+    val predicate = formula.asInstanceOf[Predicate]
+
+    val assign_map = Map(VariableTerm("string") -> NumeralTerm(10))
+    assertThrows[PredicateGroundingError] {
+      val proposition = predicate.to_ground(assign_map)
+    }
+  }
+
 }

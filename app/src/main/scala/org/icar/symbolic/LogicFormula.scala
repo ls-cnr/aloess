@@ -13,7 +13,7 @@ abstract class LogicFormula
 // TODO: this class can be renamed as "Proposition"
 case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString : String = functional+"("+terms.mkString(",")+")"
-	//def to_predicate : Predicate = Predicate(functional,for(t<-terms) yield t.asInstanceOf[Term])
+	def to_predicate : Predicate = Predicate(functional,for(t<-terms) yield t.asInstanceOf[Term])
 }
 
 case class True() extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
@@ -46,7 +46,6 @@ case class BiImplication(l:LogicFormula, r:LogicFormula) extends LogicFormula wi
 /* FOL components */
 case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula with FOLNature with LTLNature with MTLNature {
 	override def toString : String = functional+"("+terms.mkString(",")+")"
-/*
 
 	def isGround : Boolean = {
 		var ground = true
@@ -55,47 +54,30 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 		ground
 	}
 
-	def get_grounded : Option[GroundPredicate] = {
-		if (isGround) {
-			var array : List[ConstantTerm] = List.empty
-			for (t<-terms)
-				t match {
-					case AtomTerm(a) => array = AtomTerm(a) :: array
-					case StringTerm(s) => array = StringTerm(s) :: array
-					case NumeralTerm(n) => array = NumeralTerm(n) :: array
-					case IntegerTerm(i) => array = IntegerTerm(i) :: array
-					case TruthTerm() => array = TruthTerm() :: array
-					case FalsityTerm() => array = FalsityTerm() :: array
-					case _ => array = FalsityTerm() :: array
-				}
-			Some(GroundPredicate(this.functional,array.reverse))
-
-		} else {
-			None
+	@throws(classOf[PredicateGroundingError])
+	def to_ground(assignments : Map[VariableTerm,ConstantTerm]) : GroundPredicate  = {
+		try {
+			val ground_terms = for (t<-terms) yield replace_var(t,assignments)
+			GroundPredicate(functional,ground_terms)
+		} catch {
+			case e : Exception => throw new PredicateGroundingError(this.toString+" contains free variables")
 		}
 	}
 
-	// TODO exception if not all variables are mapped into constants
-	def to_ground(assignments : Map[VariableTerm,ConstantTerm]) : GroundPredicate = {
-		val ground_terms = for (t<-terms) yield replace_var(t,assignments)
-		GroundPredicate(functional,ground_terms)
-	}
-
-	private def replace_var(t: Term,assignments : Map[VariableTerm,ConstantTerm]):ConstantTerm = {
+	@throws(classOf[NotSupportedTerm])
+	private def replace_var(t: Term,assignments : Map[VariableTerm,ConstantTerm]) : ConstantTerm = {
 		t match {
-			case AtomTerm(_) => t.asInstanceOf[AtomTerm]
-			case StringTerm(_) => t.asInstanceOf[StringTerm]
-			case NumeralTerm(_) => t.asInstanceOf[NumeralTerm]
-			case IntegerTerm(_) => t.asInstanceOf[IntegerTerm]
+			case VariableTerm(name) => assignments(VariableTerm(name))
+			case AtomTerm(s) => AtomTerm(s)
+			case StringTerm(s) => StringTerm(s)
+			case NumeralTerm(n) => NumeralTerm(n)
+			case IntegerTerm(n) => IntegerTerm(n)
 			case TruthTerm() => TruthTerm()
 			case FalsityTerm() => FalsityTerm()
 
-			case VariableTerm(name) =>
-				assignments(VariableTerm(name))
-			case _=> FalsityTerm()
+			case _=> throw new NotSupportedTerm(t.getClass.getName)
 		}
 	}
-*/
 }
 
 case class ExistQuantifier(variable: VariableTerm, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
@@ -143,7 +125,8 @@ case class MetricRelease(left : LogicFormula, right : LogicFormula, interval : M
 
 
 case class MetricInterval(start:Int,end:Int)
-
+class PredicateGroundingError(s : String) extends Exception(s) {}
+class NotSupportedTerm(t: String) extends Exception(t) {}
 
 /******* PREDICATE TERMS ********/
 sealed abstract class Term
