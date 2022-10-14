@@ -10,8 +10,7 @@ plugins {
     // Apply the scala Plugin to add support for Scala.
     id 'scala'
 
-    // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
+    id "com.github.maiflai.scalatest" version "0.32"
 }
 
 repositories {
@@ -32,6 +31,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.scalatest:scalatest_2.13:3.2.10'
     testImplementation 'org.scalatestplus:junit-4-13_2.13:3.2.2.0'
+    testImplementation "com.vladsch.flexmark:flexmark-all:0.64.0"
 
     // Need scala-xml at test runtime
     testRuntimeOnly 'org.scala-lang.modules:scala-xml_2.13:1.2.0'
@@ -40,22 +40,16 @@ dependencies {
 sourceSets {
     main {
         scala {
-            srcDir 'src/main/scala'
+            srcDir 'app/src/main/scala'
         }
        resources {
-            srcDir 'src/main/resources'
+            srcDir 'app/src/main/resources'
         }
     }
     test {
         scala {
-            srcDirs 'src/test/scala'
+            srcDir 'app/src/test/scala'
         }
     }
 
-}
-
-
-application {
-    // Define the main class for the application.
-    mainClass = 'org.icar.App'
 }
