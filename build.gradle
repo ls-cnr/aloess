@@ -37,6 +37,24 @@ dependencies {
     testRuntimeOnly 'org.scala-lang.modules:scala-xml_2.13:1.2.0'
 }
 
+sourceSets {
+    main {
+        scala {
+            srcDir 'src/main/scala'
+        }
+       resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    test {
+        scala {
+            srcDirs 'src/test/scala'
+        }
+    }
+
+}
+
+
 application {
     // Define the main class for the application.
     mainClass = 'org.icar.App'
