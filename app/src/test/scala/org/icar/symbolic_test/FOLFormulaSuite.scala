@@ -47,4 +47,17 @@ class FOLFormulaSuite extends AnyFunSuite {
     }
   }
 
+  test("FOL formula apply sobstitutions") {
+    val b = new FOLBuilder
+    val formula = b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string")))))
+
+    val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
+    assert(formula.apply_sobstitution(assign_map)==
+      UnivQuantifier(VariableTerm("integer"),
+        Conjunction(List(
+          Predicate("test1",List(NumeralTerm(10))),
+          Predicate("test2",List(VariableTerm("string"))))))
+    )
+  }
+
 }

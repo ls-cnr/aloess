@@ -30,4 +30,17 @@ class LTLFormulaSuite extends AnyFunSuite {
     assert(formula == Disjunction(List(Globally(Predicate("uno",List())),Until(Predicate("due",List()),Predicate("tre",List())))))
   }
 
+  test("LTL formula apply sobstitutions") {
+    val b = new LTLBuilder
+    val formula = b.globally(b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string"))))))
+
+    val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
+    assert(formula.apply_sobstitution(assign_map)==Globally(
+      UnivQuantifier(VariableTerm("integer"),
+        Conjunction(List(
+          Predicate("test1",List(NumeralTerm(10))),
+          Predicate("test2",List(VariableTerm("string"))))))
+    ))
+  }
+
 }
