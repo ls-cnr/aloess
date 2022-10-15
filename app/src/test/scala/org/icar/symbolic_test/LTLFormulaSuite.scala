@@ -10,13 +10,13 @@ class LTLFormulaSuite extends AnyFunSuite {
   test("building LTL formula without temporal operators") {
     val b = new LTLBuilder
     val formula = b.and(b.proposition("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer")))))
-    assert(formula == Conjunction(List(GroundPredicate("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer")))))))
+    assert(formula == Conjunction(List(Proposition("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer")))))))
   }
 
   test("building LTL formula with Finally") {
     val b = new LTLBuilder
     val formula = b.finally_(b.and(b.proposition("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer"))))))
-    assert(formula == Finally(Conjunction(List(GroundPredicate("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer"))))))))
+    assert(formula == Finally(Conjunction(List(Proposition("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer"))))))))
   }
 
   test("building 'and' two LTL formulas") {
@@ -35,7 +35,7 @@ class LTLFormulaSuite extends AnyFunSuite {
     val formula = b.globally(b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string"))))))
 
     val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
-    assert(formula.apply_sobstitution(assign_map)==Globally(
+    assert(formula.apply_substitution(assign_map)==Globally(
       UnivQuantifier(VariableTerm("integer"),
         Conjunction(List(
           Predicate("test1",List(NumeralTerm(10))),

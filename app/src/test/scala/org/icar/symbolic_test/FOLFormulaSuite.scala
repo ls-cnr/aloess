@@ -10,7 +10,7 @@ class FOLFormulaSuite extends AnyFunSuite {
   test("building FOL with proposition formula") {
     val b = new FOLBuilder
     val formula : LogicFormula = b.proposition("test",List())
-    assert(formula == GroundPredicate("test",List()))
+    assert(formula == Proposition("test",List()))
   }
 
   test("building FOL with predicate formula") {
@@ -32,8 +32,8 @@ class FOLFormulaSuite extends AnyFunSuite {
     assert (!predicate.isGround)
 
     val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
-    val proposition = predicate.to_ground(assign_map)
-    assert(proposition == GroundPredicate("test", List(NumeralTerm(10))))
+    val proposition = predicate.to_proposition(assign_map)
+    assert(proposition == Proposition("test", List(NumeralTerm(10))))
   }
 
   test("predicate translation throws exceptions when not grounded") {
@@ -43,7 +43,7 @@ class FOLFormulaSuite extends AnyFunSuite {
 
     val assign_map = Map(VariableTerm("string") -> NumeralTerm(10))
     assertThrows[PredicateGroundingError] {
-      val proposition = predicate.to_ground(assign_map)
+      val proposition = predicate.to_proposition(assign_map)
     }
   }
 
@@ -52,7 +52,7 @@ class FOLFormulaSuite extends AnyFunSuite {
     val formula = b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string")))))
 
     val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
-    assert(formula.apply_sobstitution(assign_map)==
+    assert(formula.apply_substitution(assign_map)==
       UnivQuantifier(VariableTerm("integer"),
         Conjunction(List(
           Predicate("test1",List(NumeralTerm(10))),

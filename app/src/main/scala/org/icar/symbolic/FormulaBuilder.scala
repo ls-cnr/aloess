@@ -2,7 +2,7 @@ package org.icar.symbolic
 
 /* formula builder */
 class PropositionBuilder {
-  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with PropositionNature = GroundPredicate(functional,terms)
+  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with PropositionNature = Proposition(functional,terms)
   def truth : LogicFormula with PropositionNature = True()
   def falsity : LogicFormula with PropositionNature = False()
   def not(arg : LogicFormula with PropositionNature) : LogicFormula with PropositionNature = Negation(arg)
@@ -14,7 +14,7 @@ class PropositionBuilder {
 }
 
 class FOLBuilder {
-  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with FOLNature = GroundPredicate(functional,terms)
+  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with FOLNature = Proposition(functional,terms)
   def truth : LogicFormula with FOLNature = True()
   def falsity : LogicFormula with FOLNature = False()
   def not(arg : LogicFormula with FOLNature) : LogicFormula with FOLNature = Negation(arg)
@@ -30,7 +30,7 @@ class FOLBuilder {
 }
 
 class LTLBuilder {
-  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with LTLNature = GroundPredicate(functional,terms)
+  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with LTLNature = Proposition(functional,terms)
   def truth : LogicFormula with LTLNature = True()
   def falsity : LogicFormula with LTLNature = False()
   def not(arg : LogicFormula with LTLNature) : LogicFormula with LTLNature = Negation(arg)
@@ -53,7 +53,7 @@ class LTLBuilder {
 
 
 class MTLBuilder {
-  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with MTLNature = GroundPredicate(functional,terms)
+  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with MTLNature = Proposition(functional,terms)
   def truth : LogicFormula with MTLNature = True()
   def falsity : LogicFormula with MTLNature = False()
   def not(arg : LogicFormula with MTLNature) : LogicFormula with MTLNature = Negation(arg)

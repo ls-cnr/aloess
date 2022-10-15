@@ -1,6 +1,6 @@
 package org.icar.symbolic_test
 
-import org.icar.symbolic.{Conjunction, GroundPredicate, PropositionBuilder, True}
+import org.icar.symbolic.{Conjunction, Proposition, PropositionBuilder, True}
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
@@ -10,7 +10,7 @@ class PropositionFormulaSuite extends AnyFunSuite {
   test("building proposition formula") {
     val b = new PropositionBuilder
     val formula = b.proposition("test",List())
-    assert(formula == GroundPredicate("test",List()))
+    assert(formula == Proposition("test",List()))
   }
 
   test("building always true formula") {
@@ -22,7 +22,7 @@ class PropositionFormulaSuite extends AnyFunSuite {
   test("building 'and' formula") {
     val b = new PropositionBuilder
     val formula = b.and(b.proposition("test",List()),b.truth)
-    assert(formula == Conjunction(List(GroundPredicate("test",List()),True())))
+    assert(formula == Conjunction(List(Proposition("test",List()),True())))
   }
 
 }

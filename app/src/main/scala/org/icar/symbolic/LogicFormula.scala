@@ -10,33 +10,32 @@ trait MTLNature
 /* formula components */
 abstract class LogicFormula {
 	def isGround : Boolean
-	def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]) : LogicFormula
+	def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]) : LogicFormula
 }
 
-// TODO: this class can be renamed as "Proposition"
-case class GroundPredicate(functional:String, terms: List[ConstantTerm] ) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
+case class Proposition(functional:String, terms: List[ConstantTerm] ) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString : String = functional+"("+terms.mkString(",")+")"
 	def to_predicate : Predicate = Predicate(functional,for(t<-terms) yield t.asInstanceOf[Term])
 
 	override def isGround: Boolean = true
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = this
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = this
 }
 
 case class True() extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "\u22A4"
 	override def isGround: Boolean = true
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = this
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = this
 }
 case class False() extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "\u22A5"
 	override def isGround: Boolean = true
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = this
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = this
 }
 
 case class Negation(formula : LogicFormula) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString : String = "-"+formula
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Negation(formula.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Negation(formula.apply_substitution(assignments))
 }
 case class Conjunction(formulas : List[LogicFormula]) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "("+formulas.mkString(" and ")+")"
@@ -45,8 +44,8 @@ case class Conjunction(formulas : List[LogicFormula]) extends LogicFormula with 
 		for (f <- formulas) if (!f.isGround) result = false
 		result
 	}
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
-		val treated_formulas = for (f <- formulas) yield f.apply_sobstitution(assignments)
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
+		val treated_formulas = for (f <- formulas) yield f.apply_substitution(assignments)
 		Conjunction(treated_formulas)
 	}
 }
@@ -57,8 +56,8 @@ case class Disjunction(formulas : List[LogicFormula]) extends LogicFormula with 
 		for (f <- formulas) if (!f.isGround) result = false
 		result
 	}
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
-		val treated_formulas = for (f <- formulas) yield f.apply_sobstitution(assignments)
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
+		val treated_formulas = for (f <- formulas) yield f.apply_substitution(assignments)
 		Disjunction(treated_formulas)
 	}
 }
@@ -69,23 +68,23 @@ case class ExclDisj(formulas : List[LogicFormula]) extends LogicFormula with Pro
 		for (f <- formulas) if (!f.isGround) result = false
 		result
 	}
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
-		val treated_formulas = for (f <- formulas) yield f.apply_sobstitution(assignments)
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
+		val treated_formulas = for (f <- formulas) yield f.apply_substitution(assignments)
 		ExclDisj(treated_formulas)
 	}
 }
 case class Implication(l:LogicFormula, r:LogicFormula) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "("+l+" -> "+r+")"
 	override def isGround: Boolean = l.isGround & r.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
-		Implication(l.apply_sobstitution(assignments),r.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
+		Implication(l.apply_substitution(assignments),r.apply_substitution(assignments))
 	}
 }
 case class BiImplication(l:LogicFormula, r:LogicFormula) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "("+l+" <-> "+r+")"
 	override def isGround: Boolean = l.isGround & r.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
-		BiImplication(l.apply_sobstitution(assignments),r.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
+		BiImplication(l.apply_substitution(assignments),r.apply_substitution(assignments))
 	}
 }
 
@@ -102,7 +101,7 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 	}
 
 	@throws(classOf[NotSupportedTerm])
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
 		var treated_terms : List[Term] = List.empty
 		for (t<-terms)
 			t match {
@@ -119,10 +118,10 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 	}
 
 	@throws(classOf[PredicateGroundingError])
-	def to_ground(assignments : Map[VariableTerm,ConstantTerm]) : GroundPredicate  = {
+	def to_proposition(assignments : Map[VariableTerm,ConstantTerm]) : Proposition  = {
 		try {
 			val ground_terms = for (t<-terms) yield replace_var(t,assignments)
-			GroundPredicate(functional,ground_terms)
+			Proposition(functional,ground_terms)
 		} catch {
 			case e : Exception => throw new PredicateGroundingError(this.toString+" contains free variables")
 		}
@@ -147,13 +146,13 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 case class ExistQuantifier(variable: VariableTerm, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "\u2203 "+variable+":"+formula
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = ExistQuantifier(variable,formula.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = ExistQuantifier(variable,formula.apply_substitution(assignments))
 }
 
 case class UnivQuantifier(variable : VariableTerm, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "\u2200 "+variable+":"+formula
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = UnivQuantifier(variable,formula.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = UnivQuantifier(variable,formula.apply_substitution(assignments))
 }
 
 
@@ -161,27 +160,27 @@ case class UnivQuantifier(variable : VariableTerm, formula : LogicFormula) exten
 case class Globally(formula : LogicFormula) extends LogicFormula with LTLNature {
 	override def toString: String = "("+"G "+formula+")"
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Globally(formula.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Globally(formula.apply_substitution(assignments))
 }
 case class Finally(formula : LogicFormula) extends LogicFormula with LTLNature {
 	override def toString: String = "("+"F "+formula+")"
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Finally(formula.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Finally(formula.apply_substitution(assignments))
 }
 case class Next(formula : LogicFormula) extends LogicFormula with LTLNature {
 	override def toString: String = "("+"X "+formula+")"
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Next(formula.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Next(formula.apply_substitution(assignments))
 }
 case class Until(left : LogicFormula, right : LogicFormula) extends LogicFormula with LTLNature {
 	override def toString: String = "("+left+" U "+right+")"
 	override def isGround: Boolean = left.isGround & right.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Until(left.apply_sobstitution(assignments),right.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Until(left.apply_substitution(assignments),right.apply_substitution(assignments))
 }
 case class Release(left : LogicFormula, right : LogicFormula) extends LogicFormula with LTLNature {
 	override def toString: String = "("+left+" R "+right+")"
 	override def isGround: Boolean = left.isGround & right.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Release(left.apply_sobstitution(assignments),right.apply_sobstitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Release(left.apply_substitution(assignments),right.apply_substitution(assignments))
 }
 
 
@@ -189,22 +188,22 @@ case class Release(left : LogicFormula, right : LogicFormula) extends LogicFormu
 case class MetricGlobally(formula : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
 	override def toString: String = "("+"G "+formula+")"
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricGlobally(formula.apply_sobstitution(assignments),interval)
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricGlobally(formula.apply_substitution(assignments),interval)
 }
 case class MetricFinally(formula : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
 	override def toString: String = "("+"F "+formula+")"
 	override def isGround: Boolean = formula.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricFinally(formula.apply_sobstitution(assignments),interval)
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricFinally(formula.apply_substitution(assignments),interval)
 }
 case class MetricUntil(left : LogicFormula, right : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
 	override def toString: String = "("+left+" U "+right+")"
 	override def isGround: Boolean = left.isGround & right.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricUntil(left.apply_sobstitution(assignments),right.apply_sobstitution(assignments),interval)
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricUntil(left.apply_substitution(assignments),right.apply_substitution(assignments),interval)
 }
 case class MetricRelease(left : LogicFormula, right : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
 	override def toString: String = "("+left+" R "+right+")"
 	override def isGround: Boolean = left.isGround & right.isGround
-	override def apply_sobstitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricRelease(left.apply_sobstitution(assignments),right.apply_sobstitution(assignments),interval)
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricRelease(left.apply_substitution(assignments),right.apply_substitution(assignments),interval)
 }
 
 case class MetricInterval(start:Int,end:Int)
