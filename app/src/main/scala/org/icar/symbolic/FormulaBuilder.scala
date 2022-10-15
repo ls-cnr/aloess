@@ -28,6 +28,21 @@ class FOLBuilder {
   def predicate(functional:String, terms: List[Term]) : LogicFormula with FOLNature = Predicate(functional,terms)
   def exists(variable: VariableTerm, formula : LogicFormula with FOLNature) : LogicFormula with FOLNature = ExistQuantifier(variable,formula)
   def foreach(variable: VariableTerm, formula : LogicFormula with FOLNature) : LogicFormula with FOLNature = UnivQuantifier(variable,formula)
+
+  def promote(form : LogicFormula) : LogicFormula with FOLNature = {
+    form match {
+      case Proposition(f,args) => predicate(f,args)
+      case True() => truth
+      case False() => falsity
+      case Negation(arg) => not(promote(arg))
+      case Conjunction(formulas) => if (formulas.length==2) and(promote(formulas.head),promote(formulas.tail.head)) else throw new NotSupportedLiteral("conjunction with > 2 args")
+      case Disjunction(formulas) => if (formulas.length==2) or(promote(formulas.head),promote(formulas.tail.head)) else throw new NotSupportedLiteral("disjunction with > 2 args")
+      case ExclDisj(formulas) => if (formulas.length==2) xor(promote(formulas.head),promote(formulas.tail.head)) else throw new NotSupportedLiteral("exc-disjunction with > 2 args")
+      case Implication(form1,form2) =>implies(promote(form1),promote(form2))
+      case BiImplication(form1,form2) =>biimpl(promote(form1),promote(form2))
+      case _ => throw new NotSupportedLiteral("exc-disjunction with > 2 args")
+    }
+  }
 }
 
 class LTLBuilder {

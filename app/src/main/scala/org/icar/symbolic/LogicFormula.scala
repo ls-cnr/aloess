@@ -241,6 +241,7 @@ case class StringTerm(str : String) extends ConstantTerm {
 /******* EXCEPTIONS ********/
 class PredicateGroundingError(s : String) extends Exception(s) {}
 class NotSupportedTerm(t: String) extends Exception(t) {}
+class NotSupportedLiteral(t: String) extends Exception(t) {}
 
 
 //object HL_PredicateFormula {

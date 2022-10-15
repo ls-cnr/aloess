@@ -15,7 +15,7 @@ class PropositionFormulaParser extends JavaTokenParsers {
   def comma_formula : Parser[LogicFormula with PropositionNature] = "("~formula~")" ^^ {case _~form~_ => form}
 
   def proposition : Parser[LogicFormula with PropositionNature] =
-    functional~"("~args~")" ^^ {case func~_~terms~_ => Proposition(func,terms)} |
+    functional~"("~args~")" ^^ {case func~_~terms~_ => b.proposition(func,terms)} |
       functional ^^ {x =>b.proposition(x,List()) }
 
   def functional : Parser[String] = ident
@@ -36,8 +36,9 @@ class PropositionFormulaParser extends JavaTokenParsers {
   def number_term : Parser[NumeralTerm] = floatingPointNumber ^^ {n => NumeralTerm(n.toDouble)}
 }
 
+
 /*
-object TestPropositionFormulaParser extends PropositionFormulaParser {
+object RunPropositionFormulaParser extends PropositionFormulaParser {
   def main(args: Array[String]): Unit = {
     println(parseAll(formula,"test(a,b)").get)
     println(parseAll(formula,"test").get)
