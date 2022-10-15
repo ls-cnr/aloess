@@ -3,6 +3,7 @@ package org.icar.symbolic
 /* formula builder */
 class PropositionBuilder {
   def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with PropositionNature = Proposition(functional,terms)
+  def proposition(functional:String) : LogicFormula with PropositionNature = Proposition(functional,List())
   def truth : LogicFormula with PropositionNature = True()
   def falsity : LogicFormula with PropositionNature = False()
   def not(arg : LogicFormula with PropositionNature) : LogicFormula with PropositionNature = Negation(arg)

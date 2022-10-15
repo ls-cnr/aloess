@@ -223,6 +223,7 @@ case class AtomTerm(atom : String) extends ConstantTerm {
 case class NumeralTerm(num : Double) extends ConstantTerm {
 	override def toString: String = num.toString
 }
+// deprecated
 case class IntegerTerm(num : Int) extends ConstantTerm {
 	override def toString: String = num.toString
 }
