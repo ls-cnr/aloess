@@ -1,4 +1,7 @@
-package org.icar.symbolic
+package org.icar.symbolic.parser
+
+import org.icar.symbolic._
+import org.icar.symbolic.builder.FOLBuilder
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
@@ -10,10 +13,12 @@ class FOLFormulaParser extends JavaTokenParsers {
   def exist_formula : Parser[LogicFormula with FOLNature] = "exists"~variable_term~","~formula ^^ {case _~v~_~form => b.exists(v,form)}
   def foreach_formula : Parser[LogicFormula with FOLNature] = "foreach"~variable_term~","~formula ^^ {case _~v~_~form => b.foreach(v,form)}
 
-  def and_formula : Parser[LogicFormula with FOLNature] = impl_formula~"and"~impl_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | impl_formula ^^ {x=>x}
-  def impl_formula : Parser[LogicFormula with FOLNature] = biiml_formula~"->"~biiml_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | biiml_formula ^^ {x=>x}
+  def and_formula : Parser[LogicFormula with FOLNature] = or_formula~"and"~not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | or_formula ^^ {x=>x}
+  def or_formula : Parser[LogicFormula with FOLNature] = impl_formula~"or"~not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | impl_formula ^^ {x=>x}
+  def impl_formula : Parser[LogicFormula with FOLNature] = biiml_formula~"->"~not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | biiml_formula ^^ {x=>x}
   def biiml_formula : Parser[LogicFormula with FOLNature] = not_formula~"<->"~not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | not_formula ^^ {x=>x}
   def not_formula : Parser[LogicFormula with FOLNature] = "not"~left_formula ^^ {case _~form =>b.not(form) } | left_formula
+
   def left_formula : Parser[LogicFormula with FOLNature] = comma_formula | "true" ^^ {_=>b.truth} | "false" ^^ {_=>b.falsity} | predicate
   def comma_formula : Parser[LogicFormula with FOLNature] = "("~formula~")" ^^ {case _~form~_ => form}
 
@@ -40,14 +45,16 @@ class FOLFormulaParser extends JavaTokenParsers {
 }
 
 
-/*
-object RunFOLFormulaParser extends FOLFormulaParser {
-  def main(args: Array[String]): Unit = {
-    println(parseAll(formula,"test(a,?b)").get)
-    println(parseAll(formula,"exists ?x, human(?x,y)").get)
-    println(parseAll(formula,"foreach ?color, human(x,y) and tshirt(?color)").get)
-    println(parseAll(formula,"foreach ?color, exists ?y, human(?y) and tshirt(?y,?color)").get)
-  }
-}
-*/
+//
+//object RunFOLFormulaParser extends FOLFormulaParser {
+//  def main(args: Array[String]): Unit = {
+//    println(parseAll(formula,"test(a,?b)").get)
+//    println(parseAll(formula,"exists ?x, human(?x,y)").get)
+//    println(parseAll(formula,"foreach ?color, human(x,y) and tshirt(?color)").get)
+//    println(parseAll(formula,"foreach ?color, exists ?y, human(?y) and tshirt(?y,?color)").get)
+//    println(parseAll(formula,"test1 and test2").get)
+//    println(parseAll(formula,"test1 and (test2 or test3)").get)
+//  }
+//}
+//
 

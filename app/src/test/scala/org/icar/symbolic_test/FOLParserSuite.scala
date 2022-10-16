@@ -1,6 +1,8 @@
 package org.icar.symbolic_test
 
 import org.icar.symbolic._
+import org.icar.symbolic.builder.FOLBuilder
+import org.icar.symbolic.parser.FOLFormulaParser
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
@@ -14,6 +16,15 @@ class FOLParserSuite extends AnyFunSuite {
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
     assert(f==b.predicate("test",List(AtomTerm("a"),VariableTerm("b"))))
+  }
+
+  test("parsing conjunction/disjunctiuon testA and (testB or testC)") {
+    val parser = new FOLFormulaParser
+    val b = new FOLBuilder
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.formula,"testA and (testB or testC)")
+    assert(result.successful)
+    val f : LogicFormula with FOLNature = result.get
+    assert(f==b.and(b.predicate("testA",List()),b.or(b.predicate("testB",List()),b.predicate("testC",List()))))
   }
 
   test("parsing existential quantifier exists ?x, human(?x,y)") {

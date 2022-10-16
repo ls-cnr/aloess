@@ -1,4 +1,6 @@
-package org.icar.symbolic
+package org.icar.symbolic.builder
+
+import org.icar.symbolic._
 
 /* formula builder */
 class PropositionBuilder {
@@ -15,7 +17,8 @@ class PropositionBuilder {
 }
 
 class FOLBuilder {
-  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with FOLNature = Proposition(functional,terms)
+//  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with FOLNature = Proposition(functional,terms)
+//  def proposition(functional:String) : FOLNature with PropositionNature = Proposition(functional,List())
   def truth : LogicFormula with FOLNature = True()
   def falsity : LogicFormula with FOLNature = False()
   def not(arg : LogicFormula with FOLNature) : LogicFormula with FOLNature = Negation(arg)
@@ -26,6 +29,7 @@ class FOLBuilder {
   def biimpl(arg_left : LogicFormula with FOLNature, arg_right : LogicFormula with FOLNature) : LogicFormula with FOLNature = BiImplication(arg_left,arg_right)
 
   def predicate(functional:String, terms: List[Term]) : LogicFormula with FOLNature = Predicate(functional,terms)
+  def predicate(functional:String) : LogicFormula with FOLNature = Predicate(functional,List())
   def exists(variable: VariableTerm, formula : LogicFormula with FOLNature) : LogicFormula with FOLNature = ExistQuantifier(variable,formula)
   def foreach(variable: VariableTerm, formula : LogicFormula with FOLNature) : LogicFormula with FOLNature = UnivQuantifier(variable,formula)
 
@@ -46,7 +50,8 @@ class FOLBuilder {
 }
 
 class LTLBuilder {
-  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with LTLNature = Proposition(functional,terms)
+//  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with LTLNature = Proposition(functional,terms)
+//  def proposition(functional:String) : LogicFormula with LTLNature = Proposition(functional,List())
   def truth : LogicFormula with LTLNature = True()
   def falsity : LogicFormula with LTLNature = False()
   def not(arg : LogicFormula with LTLNature) : LogicFormula with LTLNature = Negation(arg)
@@ -57,6 +62,7 @@ class LTLBuilder {
   def biimpl(arg_left : LogicFormula with LTLNature, arg_right : LogicFormula with LTLNature) : LogicFormula with LTLNature = BiImplication(arg_left,arg_right)
 
   def predicate(functional:String, terms: List[Term]) : LogicFormula with LTLNature = Predicate(functional,terms)
+  def predicate(functional:String) : LogicFormula with LTLNature = Predicate(functional,List())
   def exists(variable: VariableTerm, formula : LogicFormula with LTLNature) : LogicFormula with LTLNature = ExistQuantifier(variable,formula)
   def foreach(variable: VariableTerm, formula : LogicFormula with LTLNature) : LogicFormula with LTLNature = UnivQuantifier(variable,formula)
 
@@ -69,7 +75,8 @@ class LTLBuilder {
 
 
 class MTLBuilder {
-  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with MTLNature = Proposition(functional,terms)
+//  def proposition(functional:String, terms: List[ConstantTerm]) : LogicFormula with MTLNature = Proposition(functional,terms)
+//  def proposition(functional:String) : LogicFormula with MTLNature = Proposition(functional,List())
   def truth : LogicFormula with MTLNature = True()
   def falsity : LogicFormula with MTLNature = False()
   def not(arg : LogicFormula with MTLNature) : LogicFormula with MTLNature = Negation(arg)
@@ -80,11 +87,12 @@ class MTLBuilder {
   def biimpl(arg_left : LogicFormula with MTLNature, arg_right : LogicFormula with MTLNature) : LogicFormula with MTLNature = BiImplication(arg_left,arg_right)
 
   def predicate(functional:String, terms: List[Term]) : LogicFormula with MTLNature = Predicate(functional,terms)
+  def predicate(functional:String) : LogicFormula with MTLNature = Predicate(functional,List())
   def exists(variable: VariableTerm, formula : LogicFormula with MTLNature) : LogicFormula with MTLNature = ExistQuantifier(variable,formula)
   def foreach(variable: VariableTerm, formula : LogicFormula with MTLNature) : LogicFormula with MTLNature = UnivQuantifier(variable,formula)
 
   def globally(formula : LogicFormula with MTLNature, interval: MetricInterval) : LogicFormula with MTLNature = MetricGlobally(formula,interval)
   def finally_(formula : LogicFormula with MTLNature, interval: MetricInterval) : LogicFormula with MTLNature = MetricFinally(formula,interval)
-  def until(arg_left : LogicFormula with MTLNature,arg_right : LogicFormula with MTLNature, interval: MetricInterval): LogicFormula with MTLNature = MetricUntil(arg_left,arg_left,interval)
-  def release(arg_left : LogicFormula with MTLNature,arg_right : LogicFormula with MTLNature, interval: MetricInterval) :LogicFormula with MTLNature = MetricRelease(arg_left,arg_left,interval)
+  def until(arg_left : LogicFormula with MTLNature,arg_right : LogicFormula with MTLNature, interval: MetricInterval): LogicFormula with MTLNature = MetricUntil(arg_left,arg_right,interval)
+  def release(arg_left : LogicFormula with MTLNature,arg_right : LogicFormula with MTLNature, interval: MetricInterval) :LogicFormula with MTLNature = MetricRelease(arg_left,arg_right,interval)
 }

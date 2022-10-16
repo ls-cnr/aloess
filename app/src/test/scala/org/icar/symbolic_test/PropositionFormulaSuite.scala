@@ -1,6 +1,7 @@
 package org.icar.symbolic_test
 
-import org.icar.symbolic.{Conjunction, Proposition, PropositionBuilder, True}
+import org.icar.symbolic.builder.PropositionBuilder
+import org.icar.symbolic.{Conjunction, Proposition, True}
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner

@@ -1,6 +1,7 @@
 package org.icar.symbolic_test
 
 import org.icar.symbolic._
+import org.icar.symbolic.builder.LTLBuilder
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
@@ -9,14 +10,14 @@ import org.scalatestplus.junit.JUnitRunner
 class LTLFormulaSuite extends AnyFunSuite {
   test("building LTL formula without temporal operators") {
     val b = new LTLBuilder
-    val formula = b.and(b.proposition("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer")))))
-    assert(formula == Conjunction(List(Proposition("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer")))))))
+    val formula = b.and(b.predicate("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer")))))
+    assert(formula == Conjunction(List(Predicate("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer")))))))
   }
 
   test("building LTL formula with Finally") {
     val b = new LTLBuilder
-    val formula = b.finally_(b.and(b.proposition("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer"))))))
-    assert(formula == Finally(Conjunction(List(Proposition("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer"))))))))
+    val formula = b.finally_(b.and(b.predicate("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer"))))))
+    assert(formula == Finally(Conjunction(List(Predicate("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer"))))))))
   }
 
   test("building 'and' two LTL formulas") {

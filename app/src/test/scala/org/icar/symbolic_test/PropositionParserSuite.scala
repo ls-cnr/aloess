@@ -1,6 +1,8 @@
 package org.icar.symbolic_test
 
 import org.icar.symbolic._
+import org.icar.symbolic.builder.PropositionBuilder
+import org.icar.symbolic.parser.PropositionFormulaParser
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner

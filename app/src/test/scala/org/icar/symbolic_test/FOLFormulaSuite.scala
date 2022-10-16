@@ -1,17 +1,13 @@
 package org.icar.symbolic_test
 
 import org.icar.symbolic._
+import org.icar.symbolic.builder.FOLBuilder
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class FOLFormulaSuite extends AnyFunSuite {
-  test("building FOL with proposition formula") {
-    val b = new FOLBuilder
-    val formula : LogicFormula = b.proposition("test",List())
-    assert(formula == Proposition("test",List()))
-  }
 
   test("building FOL with predicate formula") {
     val b = new FOLBuilder
