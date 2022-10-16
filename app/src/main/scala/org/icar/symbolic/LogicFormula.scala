@@ -186,22 +186,22 @@ case class Release(left : LogicFormula, right : LogicFormula) extends LogicFormu
 
 /* MTL components */
 case class MetricGlobally(formula : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
-	override def toString: String = "("+"G "+formula+")"
+	override def toString: String = "("+"G["+interval.start+","+interval.end+"] "+formula+")"
 	override def isGround: Boolean = formula.isGround
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricGlobally(formula.apply_substitution(assignments),interval)
 }
 case class MetricFinally(formula : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
-	override def toString: String = "("+"F "+formula+")"
+	override def toString: String = "("+"F["+interval.start+","+interval.end+"] "+formula+")"
 	override def isGround: Boolean = formula.isGround
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricFinally(formula.apply_substitution(assignments),interval)
 }
 case class MetricUntil(left : LogicFormula, right : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
-	override def toString: String = "("+left+" U "+right+")"
+	override def toString: String = "("+left+" U["+interval.start+","+interval.end+"] "+right+")"
 	override def isGround: Boolean = left.isGround & right.isGround
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricUntil(left.apply_substitution(assignments),right.apply_substitution(assignments),interval)
 }
 case class MetricRelease(left : LogicFormula, right : LogicFormula, interval : MetricInterval) extends LogicFormula with MTLNature {
-	override def toString: String = "("+left+" R "+right+")"
+	override def toString: String = "("+left+" R"+interval.start+","+interval.end+"] "+right+")"
 	override def isGround: Boolean = left.isGround & right.isGround
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = MetricRelease(left.apply_substitution(assignments),right.apply_substitution(assignments),interval)
 }
