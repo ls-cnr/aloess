@@ -40,7 +40,7 @@ class FOLFormulaParser extends JavaTokenParsers {
 
   def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
   def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
-  def number_term : Parser[NumeralTerm] = floatingPointNumber ^^ {n => NumeralTerm(n.toDouble)}
+  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
   def variable_term : Parser[VariableTerm] = "?"~ident ^^ { case _~x => VariableTerm(x)}
 }
 

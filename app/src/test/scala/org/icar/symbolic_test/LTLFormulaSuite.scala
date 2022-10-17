@@ -35,11 +35,11 @@ class LTLFormulaSuite extends AnyFunSuite {
     val b = new LTLBuilder
     val formula = b.globally(b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string"))))))
 
-    val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
+    val assign_map = Map(VariableTerm("integer") -> NumberTerm(10))
     assert(formula.apply_substitution(assign_map)==Globally(
       UnivQuantifier(VariableTerm("integer"),
         Conjunction(List(
-          Predicate("test1",List(NumeralTerm(10))),
+          Predicate("test1",List(NumberTerm(10))),
           Predicate("test2",List(VariableTerm("string"))))))
     ))
   }

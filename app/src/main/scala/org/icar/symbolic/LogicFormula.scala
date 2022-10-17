@@ -133,7 +133,7 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 			case VariableTerm(name) => assignments(VariableTerm(name))
 			case AtomTerm(s) => AtomTerm(s)
 			case StringTerm(s) => StringTerm(s)
-			case NumeralTerm(n) => NumeralTerm(n)
+			case NumberTerm(n) => NumberTerm(n)
 			case IntegerTerm(n) => IntegerTerm(n)
 			case TrueTerm() => TrueTerm()
 			case FalseTerm() => FalseTerm()
@@ -220,7 +220,7 @@ abstract class ConstantTerm extends Term
 case class AtomTerm(atom : String) extends ConstantTerm {
 	override def toString: String = atom
 }
-case class NumeralTerm(num : Double) extends ConstantTerm {
+case class NumberTerm(num : Double) extends ConstantTerm {
 	override def toString: String = num.toString
 }
 // deprecated

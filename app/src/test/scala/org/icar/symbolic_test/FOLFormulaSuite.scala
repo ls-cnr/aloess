@@ -27,9 +27,9 @@ class FOLFormulaSuite extends AnyFunSuite {
     val predicate = formula.asInstanceOf[Predicate]
     assert (!predicate.isGround)
 
-    val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
+    val assign_map = Map(VariableTerm("integer") -> NumberTerm(10))
     val proposition = predicate.to_proposition(assign_map)
-    assert(proposition == Proposition("test", List(NumeralTerm(10))))
+    assert(proposition == Proposition("test", List(NumberTerm(10))))
   }
 
   test("predicate translation throws exceptions when not grounded") {
@@ -37,7 +37,7 @@ class FOLFormulaSuite extends AnyFunSuite {
     val formula = b.predicate("test",List(VariableTerm("integer")))
     val predicate = formula.asInstanceOf[Predicate]
 
-    val assign_map = Map(VariableTerm("string") -> NumeralTerm(10))
+    val assign_map = Map(VariableTerm("string") -> NumberTerm(10))
     assertThrows[PredicateGroundingError] {
       val proposition = predicate.to_proposition(assign_map)
     }
@@ -47,11 +47,11 @@ class FOLFormulaSuite extends AnyFunSuite {
     val b = new FOLBuilder
     val formula = b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string")))))
 
-    val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
+    val assign_map = Map(VariableTerm("integer") -> NumberTerm(10))
     assert(formula.apply_substitution(assign_map)==
       UnivQuantifier(VariableTerm("integer"),
         Conjunction(List(
-          Predicate("test1",List(NumeralTerm(10))),
+          Predicate("test1",List(NumberTerm(10))),
           Predicate("test2",List(VariableTerm("string"))))))
     )
   }

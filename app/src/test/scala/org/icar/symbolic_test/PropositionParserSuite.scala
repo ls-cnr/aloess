@@ -22,7 +22,7 @@ class PropositionParserSuite extends AnyFunSuite {
     val result : parser.ParseResult[LogicFormula with PropositionNature] = parser.parseAll(parser.formula,"test(a,\"b\",10,false)")
     assert(result.successful)
     val f : LogicFormula with PropositionNature = result.get
-    assert(f==Proposition("test",List(AtomTerm("a"),StringTerm("b"),NumeralTerm(10),FalseTerm())))
+    assert(f==Proposition("test",List(AtomTerm("a"),StringTerm("b"),NumberTerm(10),FalseTerm())))
   }
 
   test("parsing 1-ary proposition test") {

@@ -36,7 +36,7 @@ class PropositionFormulaParser extends JavaTokenParsers {
 
   def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
 
-  def number_term : Parser[NumeralTerm] = floatingPointNumber ^^ {n => NumeralTerm(n.toDouble)}
+  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
 }
 
 

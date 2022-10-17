@@ -30,11 +30,11 @@ class MTLFormulaSuite extends AnyFunSuite {
     val b = new MTLBuilder
     val formula = b.globally(b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string"))))),MetricInterval(1,5))
 
-    val assign_map = Map(VariableTerm("integer") -> NumeralTerm(10))
+    val assign_map = Map(VariableTerm("integer") -> NumberTerm(10))
     assert(formula.apply_substitution(assign_map)==MetricGlobally(
       UnivQuantifier(VariableTerm("integer"),
         Conjunction(List(
-          Predicate("test1",List(NumeralTerm(10))),
+          Predicate("test1",List(NumberTerm(10))),
           Predicate("test2",List(VariableTerm("string")))))),MetricInterval(1,5)))
   }
 
