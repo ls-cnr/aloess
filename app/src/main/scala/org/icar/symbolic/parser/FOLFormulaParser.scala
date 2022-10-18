@@ -5,7 +5,9 @@ import org.icar.symbolic.builder.FOLBuilder
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
-class FOLFormulaParser extends JavaTokenParsers {
+class FOLFormulaParser extends FOLFormulaParserTrait
+
+trait FOLFormulaParserTrait extends JavaTokenParsers {
   var b = new FOLBuilder
 
   def formula : Parser[LogicFormula with FOLNature] = exist_formula | foreach_formula | and_formula

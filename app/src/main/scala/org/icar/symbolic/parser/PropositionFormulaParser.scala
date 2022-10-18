@@ -5,7 +5,9 @@ import org.icar.symbolic.builder.PropositionBuilder
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
-class PropositionFormulaParser extends JavaTokenParsers {
+class PropositionFormulaParser extends PropositionFormulaParserTrait
+
+trait PropositionFormulaParserTrait extends JavaTokenParsers {
   val b = new PropositionBuilder
 
   def formula : Parser[LogicFormula with PropositionNature] = or_formula ^^ {x=>x}

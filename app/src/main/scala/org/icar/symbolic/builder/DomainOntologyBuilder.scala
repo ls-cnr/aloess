@@ -1,13 +1,14 @@
 package org.icar.symbolic.builder
 
-import org.icar.symbolic.{ArgumentType, AtomCategory, AtomTerm, Axiom, BoundedIntervalArgument, ConstantArgument, ConstantTerm, DomainOntology, EnumerableArgument, MixedCategory, NumberCategory, NumberTerm, ObjectCategory, Predicate, PredicateSignature, RuleAntecedent, StringCategory, StringTerm}
+import org.icar.symbolic._
 
-class OntologyBuilder(name : String) {
+class DomainOntologyBuilder(name : String) {
   private var signatures : List[PredicateSignature] = List.empty
   private var categories: List[ObjectCategory] = List.empty
   private var axioms : List[Axiom] = List.empty
 
-  def build() : DomainOntology = DomainOntology(name,signatures.reverse,categories.reverse,axioms.reverse)
+  def build() : DomainOntology = build(name)
+  def build(rename:String) : DomainOntology = DomainOntology(rename,signatures.reverse,categories.reverse,axioms.reverse)
 
   def atom_category(cat_name : String, atom_names : List[String]): AtomCategory = {
     val atoms : List[AtomTerm] = for (s <- atom_names) yield AtomTerm(s)
@@ -36,6 +37,11 @@ class OntologyBuilder(name : String) {
     cat
   }
 
+  def signature(predicate_signature : PredicateSignature) : PredicateSignature = {
+    signatures = predicate_signature :: signatures
+    predicate_signature
+  }
+
   def signature(functor : String) = new PredicateSignatureBuilder(functor,categories)
 
   def axiom(consequent:Predicate, rhr:RuleAntecedent): Unit = {
@@ -54,11 +60,12 @@ class OntologyBuilder(name : String) {
       this
     }
 
-    //    def with_enum_arg(id : String):PredicateSignatureBuilder = {
-    //      //val cat = get_category_by_name(id)
-    //      arg_types = EnumerableArgument(name) :: arg_types
-    //      this
-    //    }
+    def with_enum_arg(id : String):PredicateSignatureBuilder = {
+      //val cat = get_category_by_name(id)
+      arg_types = EnumerableArgument(id) :: arg_types
+      this
+    }
+
     def with_interval_arg(min: Int, max: Int): PredicateSignatureBuilder = {
       arg_types = BoundedIntervalArgument(min, max) :: arg_types
       this
@@ -70,7 +77,7 @@ class OntologyBuilder(name : String) {
     }
 
   }
-  
+
 }
 
 
@@ -78,7 +85,7 @@ class OntologyBuilder(name : String) {
 
 
 object RunBuilder extends App {
-  val b = new OntologyBuilder("prova")
+  val b = new DomainOntologyBuilder("prova")
 
   val rooms = b.atom_category("rooms",List("livingroom","kitchen","bedroom"))
   b.number_category("people_number",List(1,6,8))

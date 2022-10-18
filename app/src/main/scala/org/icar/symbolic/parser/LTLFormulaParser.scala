@@ -5,7 +5,9 @@ import org.icar.symbolic.builder.LTLBuilder
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
-class LTLFormulaParser extends JavaTokenParsers {
+class LTLFormulaParser extends LTLFormulaParserTrait
+
+trait LTLFormulaParserTrait extends JavaTokenParsers {
   var b = new LTLBuilder
 
   def formula : Parser[LogicFormula with LTLNature] = exist_formula | foreach_formula | until_formula

@@ -5,7 +5,9 @@ import org.icar.symbolic.builder.MTLBuilder
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
-class MTLFormulaParser extends JavaTokenParsers {
+class MTLFormulaParser extends MTLFormulaParserTrait
+
+trait MTLFormulaParserTrait extends JavaTokenParsers {
   var b = new MTLBuilder
 
   def formula : Parser[LogicFormula with MTLNature] = exist_formula | foreach_formula | until_formula

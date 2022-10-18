@@ -1,16 +1,15 @@
 package org.icar.symbolic_test
 
-import org.icar.symbolic.{AtomCategory, AtomTerm, Axiom, BoundedIntervalArgument, ConstantArgument, DomainOntology, EnumerableArgument, NumberCategory, NumberTerm, ObjectCategory, PredicateSignature, Proposition, StringCategory, StringTerm}
-import org.icar.symbolic.builder.OntologyBuilder
-import org.icar.symbolic.builder.RunBuilder.b
+import org.icar.symbolic.builder.DomainOntologyBuilder
+import org.icar.symbolic._
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class OntologySuite extends AnyFunSuite {
+class DomainOntologySuite extends AnyFunSuite {
   test("building ontology test") {
-    val b = new OntologyBuilder("test")
+    val b = new DomainOntologyBuilder("test")
 
     val rooms = b.atom_category("rooms",List("livingroom","kitchen","bedroom"))
     b.number_category("people_number",List(1,6,8))
