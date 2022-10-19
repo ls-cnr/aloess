@@ -5,12 +5,12 @@ import org.icar.symbolic._
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
-class DomainOntologyParser extends JavaTokenParsers {
+class DomainOntologyParser extends JavaTokenParsers with FOLFormulaParserTrait {
   val ob = new DomainOntologyBuilder("noname")
 
   def domain: Parser[DomainOntology] = "domain" ~stringLiteral~ "{" ~ rep(domain_element) ~ "}" ^^ {case _~name~_~_~_ => ob.build(name.substring(1,name.length-1)) }
 
-  def domain_element: Parser[Any] = category | signature
+  def domain_element: Parser[Any] = category | signature | axiom
 
   def category: Parser[ObjectCategory] = atom_category | string_category | number_category | mixed_category
   def atom_category: Parser[AtomCategory] = "category" ~ stringLiteral ~ "atom" ~ "[" ~ repsep(ident, ",") ~ "]" ^^ {
@@ -30,8 +30,8 @@ class DomainOntologyParser extends JavaTokenParsers {
   }
   def mixed: Parser[ConstantTerm] = ident ^^ {x => AtomTerm(x)} | stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))} | floatingPointNumber ^^ {x => NumberTerm(x.toDouble)}
 
-  def signature : Parser[PredicateSignature] = "define" ~ stringLiteral~"("~args~")" ^^ {case _~sign~_~arg_list~_ => ob.signature(PredicateSignature(sign.substring(1,sign.length-1),arg_list))}
-  def args : Parser[List[ArgumentType]] = repsep(arg_definition,",")
+  def signature : Parser[PredicateSignature] = "define" ~ stringLiteral~"("~sign_args~")" ^^ {case _~sign~_~arg_list~_ => ob.signature(PredicateSignature(sign.substring(1,sign.length-1),arg_list))}
+  def sign_args : Parser[List[ArgumentType]] = repsep(arg_definition,",")
   def arg_definition : Parser[ArgumentType] = enum_arg | interval_arg | string_arg | number_arg | atom_arg
 
   def enum_arg : Parser[EnumerableArgument] = "enum"~"["~stringLiteral~"]" ^^ {case _~_~lit~_ => EnumerableArgument(lit.substring(1,lit.length-1))}
@@ -39,6 +39,27 @@ class DomainOntologyParser extends JavaTokenParsers {
   def string_arg : Parser[ConstantArgument] = "string"~"["~stringLiteral~"]" ^^ {case _~_~at~_ => ConstantArgument(StringTerm(at.substring(1,at.length-1))) }
   def number_arg : Parser[ConstantArgument] = "number"~"["~floatingPointNumber~"]" ^^ {case _~_~at~_ => ConstantArgument(NumberTerm(at.toDouble)) }
   def atom_arg : Parser[ConstantArgument] = "atom"~"["~ident~"]" ^^ {case _~_~at~_ => ConstantArgument(AtomTerm(at)) }
+
+  def axiom : Parser[Axiom] = "rule"~repsep(rule_condition,",")~"=>"~predicate ^^ {
+    case _~_ante~_~con => ob.axiom(con.asInstanceOf[Predicate],RuleAntecedent(_ante))
+  }
+
+  def rule_condition : Parser[RuleCondition] =
+    predicate ^^ {x => PredicateCondition(x.asInstanceOf[Predicate]) } |
+      "not"~predicate ^^ {
+        case _~pred => NegateCondition(pred.asInstanceOf[Predicate])
+      } |
+      expression
+
+  def expression : Parser[RuleCondition] =
+    term~"=="~term ^^ {
+      case p1~_~p2 => Equality(p1,p2)
+    } |
+    term~"!="~term ^^ {
+      case p1~_~p2 => Diversity(p1,p2)
+  }
+
+
 }
 
 
@@ -46,18 +67,6 @@ class DomainOntologyParser extends JavaTokenParsers {
 
 object RunOntologyOntologyParser$ extends DomainOntologyParser {
   def main(args: Array[String]): Unit = {
-    println(parseAll(domain,"domain \"prova1\" {  category \"prova\" atom  [ uno,due,tre ] }").get)
-    println(parseAll(domain,"domain \"prova2\" {  category \"prova\" string [ \"uno\",\"due\",\"tre\" ] }").get)
-    println(parseAll(domain,"domain \"prova3\" {  category \"prova\" number [ 1,2,3 ] }").get)
-    println(parseAll(domain,"domain \"prova4\" {  category \"prova\" mix [ 1,due,\"tre\" ] }").get)
-    println(parseAll(domain,"domain \"prova5\" {  " +
-      "category \"prova\" atom [ uno,due,tre ] " +
-      "category \"prova\" string [ \"uno\",\"due\",\"tre\" ]  " +
-      "category \"prova\" number [ 1,2,3 ]  " +
-      "category \"prova\" mix [ 1,due,\"tre\" ]  " +
-      "}").get)
-
-    println(parseAll(domain,"domain \"prova6\" {  define \"func\"(enum[\"prova\"],interval[1,4])  }").get)
-
+    println(parseAll(domain,"domain \"prova7\" {  rule p1(?a),p2(?b),?a!=?b => p12(?a,?b)  }").get)
   }
 }

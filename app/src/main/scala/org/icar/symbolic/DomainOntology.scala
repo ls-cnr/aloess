@@ -49,5 +49,6 @@ case class NegateCondition(p:Predicate) extends RuleCondition
 
 abstract class Expression extends RuleCondition
 case class Equality(term1:Term,term2:Term) extends Expression
+case class Diversity(term1:Term,term2:Term) extends Expression
 case class LesserThan(term1:Term,term2:Term) extends Expression
 case class GreaterThan(term1:Term,term2:Term) extends Expression

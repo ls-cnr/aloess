@@ -9,7 +9,7 @@ import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class DomainOntologyParserSuite extends AnyFunSuite {
-  test("parsing ontology prova1") {
+  test("parsing ontology with atom category") {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
@@ -19,7 +19,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     assert(result.get == b.build("prova1"))
   }
 
-  test("parsing ontology prova2") {
+  test("parsing ontology with string category") {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
@@ -29,7 +29,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     assert(result.get == b.build("prova2"))
   }
 
-  test("parsing ontology prova3") {
+  test("parsing ontology with numeric category") {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
@@ -39,7 +39,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     assert(result.get == b.build("prova3"))
   }
 
-  test("parsing ontology prova4") {
+  test("parsing ontology with mixed category") {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
@@ -49,7 +49,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     assert(result.get == b.build("prova4"))
   }
 
-  test("parsing ontology prova5") {
+  test("parsing ontology with all categories") {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
@@ -67,7 +67,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     assert(result.get == b.build("prova5"))
   }
 
-  test("parsing ontology prova6") {
+  test("parsing ontology with signature") {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
@@ -76,4 +76,22 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     b.signature("func").with_enum_arg("prova").with_interval_arg(1,4).create
     assert(result.get == b.build("prova6"))
   }
+
+  test("parsing ontology with axiom") {
+    val p = new DomainOntologyParser
+    val b = new DomainOntologyBuilder("none")
+
+    val result = p.parseAll(p.domain,"domain \"prova7\" {  rule p1(?a),p2(?b),?a!=?b => p12(?a,?b)  }")
+    assert(result.successful)
+    b.axiom(
+      Predicate("p12",List(VariableTerm("a"),VariableTerm("b"))),
+      RuleAntecedent(List(
+        PredicateCondition(Predicate("p1",List(VariableTerm("a")))),
+        PredicateCondition(Predicate("p2",List(VariableTerm("b")))),
+        Diversity(VariableTerm("a"),VariableTerm("b"))
+      )))
+    assert(result.get == b.build("prova7"))
+  }
 }
+
+

@@ -44,8 +44,10 @@ class DomainOntologyBuilder(name : String) {
 
   def signature(functor : String) = new PredicateSignatureBuilder(functor,categories)
 
-  def axiom(consequent:Predicate, rhr:RuleAntecedent): Unit = {
+  def axiom(consequent:Predicate, rhr:RuleAntecedent): Axiom = {
+    val a = Axiom(consequent, rhr)
     axioms = Axiom(consequent, rhr) :: axioms
+    a
   }
 
   class PredicateSignatureBuilder(name:String,categories: List[ObjectCategory]) {
