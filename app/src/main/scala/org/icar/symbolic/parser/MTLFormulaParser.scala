@@ -7,74 +7,74 @@ import scala.util.parsing.combinator.JavaTokenParsers
 
 class MTLFormulaParser extends MTLFormulaParserTrait
 
-trait MTLFormulaParserTrait extends JavaTokenParsers {
-  var b = new MTLBuilder
+trait MTLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
+  private val b = new MTLBuilder
 
-  def formula : Parser[LogicFormula with MTLNature] = exist_formula | foreach_formula | until_formula
+  def mtl_formula : Parser[LogicFormula with MTLNature] = mtl_exist_formula | mtl_foreach_formula | mtl_until_formula
 
-  def exist_formula : Parser[LogicFormula with MTLNature] = "exists"~variable_term~","~formula ^^ {case _~v~_~form => b.exists(v,form)}
-  def foreach_formula : Parser[LogicFormula with MTLNature] = "foreach"~variable_term~","~formula ^^ {case _~v~_~form => b.foreach(v,form)}
+  def mtl_exist_formula : Parser[LogicFormula with MTLNature] = "exists"~variable_term~","~mtl_formula ^^ {case _~v~_~form => b.exists(v,form)}
+  def mtl_foreach_formula : Parser[LogicFormula with MTLNature] = "foreach"~variable_term~","~mtl_formula ^^ {case _~v~_~form => b.foreach(v,form)}
 
-  def until_formula : Parser[LogicFormula with MTLNature] = release_formula~"U"~interval~not_formula ^^ {case form1~_~interv~form2 => b.until(form1,form2,interv)} | release_formula ^^ {x=>x}
-  def release_formula : Parser[LogicFormula with MTLNature] = and_formula~"R"~interval~not_formula ^^ {case form1~_~interv~form2 => b.release(form1,form2,interv)} | and_formula ^^ {x=>x}
+  def mtl_until_formula : Parser[LogicFormula with MTLNature] = mtl_release_formula~"U"~mtl_interval~mtl_not_formula ^^ {case form1~_~interv~form2 => b.until(form1,form2,interv)} | mtl_release_formula ^^ { x=>x}
+  def mtl_release_formula : Parser[LogicFormula with MTLNature] = mtl_and_formula~"R"~mtl_interval~mtl_not_formula ^^ {case form1~_~interv~form2 => b.release(form1,form2,interv)} | mtl_and_formula ^^ { x=>x}
 
-  def and_formula : Parser[LogicFormula with MTLNature] = or_formula~"and"~not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | or_formula ^^ {x=>x}
-  def or_formula : Parser[LogicFormula with MTLNature] = impl_formula~"or"~not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | impl_formula ^^ {x=>x}
-  def impl_formula : Parser[LogicFormula with MTLNature] = biiml_formula~"->"~not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | biiml_formula ^^ {x=>x}
-  def biiml_formula : Parser[LogicFormula with MTLNature] = not_formula~"<->"~not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | not_formula ^^ {x=>x}
+  def mtl_and_formula : Parser[LogicFormula with MTLNature] = mtl_or_formula~"and"~mtl_not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | mtl_or_formula ^^ { x=>x}
+  def mtl_or_formula : Parser[LogicFormula with MTLNature] = mtl_impl_formula~"or"~mtl_not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | mtl_impl_formula ^^ { x=>x}
+  def mtl_impl_formula : Parser[LogicFormula with MTLNature] = mtl_biiml_formula~"->"~mtl_not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | mtl_biiml_formula ^^ { x=>x}
+  def mtl_biiml_formula : Parser[LogicFormula with MTLNature] = mtl_not_formula~"<->"~mtl_not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | mtl_not_formula ^^ { x=>x}
 
 
-  def not_formula : Parser[LogicFormula with MTLNature] = "not"~formula ^^ {case _~form =>b.not(form) } | left_formula
+  def mtl_not_formula : Parser[LogicFormula with MTLNature] = "not"~mtl_formula ^^ {case _~form =>b.not(form) } | mtl_left_formula
 
-  def left_formula : Parser[LogicFormula with MTLNature] = unary_temporal_formula | comma_formula | "true" ^^ {_=>b.truth} | "false" ^^ {_=>b.falsity} | predicate
+  def mtl_left_formula : Parser[LogicFormula with MTLNature] = mtl_unary_temporal_formula | mtl_comma_formula | "true" ^^ { _=>b.truth} | "false" ^^ { _=>b.falsity} | mtl_predicate
 
-  def unary_temporal_formula : Parser[LogicFormula with MTLNature] = globally | finally_
-  def globally : Parser[LogicFormula with MTLNature] = "G"~interval~formula ^^ {case _~interv~form => b.globally(form,interv)}
-  def finally_ : Parser[LogicFormula with MTLNature] = "F"~interval~formula ^^ {case _~interv~form => b.finally_(form,interv)}
+  def mtl_unary_temporal_formula : Parser[LogicFormula with MTLNature] = mtl_globally | mtl_finally
+  def mtl_globally : Parser[LogicFormula with MTLNature] = "G"~mtl_interval~mtl_formula ^^ {case _~interv~form => b.globally(form,interv)}
+  def mtl_finally : Parser[LogicFormula with MTLNature] = "F"~mtl_interval~mtl_formula ^^ {case _~interv~form => b.finally_(form,interv)}
 
-  def comma_formula : Parser[LogicFormula with MTLNature] = "("~formula~")" ^^ {case _~form~_ => form}
+  def mtl_comma_formula : Parser[LogicFormula with MTLNature] = "("~mtl_formula~")" ^^ {case _~form~_ => form}
 
-  def interval : Parser[MetricInterval] = "["~wholeNumber~","~wholeNumber~"]" ^^ {case _~start~_~end~_ => MetricInterval(start.toInt,end.toInt)}
+  def mtl_interval : Parser[MetricInterval] = "["~wholeNumber~","~wholeNumber~"]" ^^ {case _~start~_~end~_ => MetricInterval(start.toInt,end.toInt)}
 
-  def predicate : Parser[LogicFormula with MTLNature] =
-    functional~"("~args~")" ^^ {case func~_~terms~_ => b.predicate(func,terms)} |
-      functional ^^ {x =>b.predicate(x,List()) }
+  def mtl_predicate : Parser[LogicFormula with MTLNature] =
+    mtl_functional~"("~mtl_args~")" ^^ {case func~_~terms~_ => b.predicate(func,terms)} |
+      mtl_functional ^^ { x =>b.predicate(x,List()) }
 
-  def functional : Parser[String] = ident
-  def args : Parser[List[Term]] = repsep(term,",")
+  def mtl_functional : Parser[String] = ident
+  def mtl_args : Parser[List[Term]] = repsep(mtl_term,",")
 
-  def term : Parser[Term] = constant_term | variable_term
+  def mtl_term : Parser[Term] = constant_term | variable_term
 
-  def constant_term : Parser[ConstantTerm] =
-    "true" ^^ {_ => TrueTerm()} |
-      "false" ^^ {_ => FalseTerm()} |
-      atom_term |
-      string_term |
-      number_term
-
-  def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
-  def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
-  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
-  def variable_term : Parser[VariableTerm] = "?"~ident ^^ { case _~x => VariableTerm(x)}
+//  def constant_term : Parser[ConstantTerm] =
+//    "true" ^^ {_ => TrueTerm()} |
+//      "false" ^^ {_ => FalseTerm()} |
+//      atom_term |
+//      string_term |
+//      number_term
+//
+//  def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
+//  def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
+//  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
+//  def variable_term : Parser[VariableTerm] = "?"~ident ^^ { case _~x => VariableTerm(x)}
 }
 
 
 
 object RunMTLFormulaParser extends MTLFormulaParser {
   def main(args: Array[String]): Unit = {
-    println(parseAll(formula,"F[1,2] test(a,?b)").get)
+    println(parseAll(mtl_formula,"F[1,2] test(a,?b)").get)
 
-    println(parseAll(formula,"exists ?x, G[0,15] human(?x,y)").get)
-    println(parseAll(formula,"F[1,2] (foreach ?color, human(x,y) and tshirt(?color))").get)
+    println(parseAll(mtl_formula,"exists ?x, G[0,15] human(?x,y)").get)
+    println(parseAll(mtl_formula,"F[1,2] (foreach ?color, human(x,y) and tshirt(?color))").get)
 
-    println(parseAll(formula,"test1 U[1,3] test2").get)
-    println(parseAll(formula,"(test1 and test2) and test3").get)
-    println(parseAll(formula,"test1 U[3,4] (test2 and test3)").get)
+    println(parseAll(mtl_formula,"test1 U[1,3] test2").get)
+    println(parseAll(mtl_formula,"(test1 and test2) and test3").get)
+    println(parseAll(mtl_formula,"test1 U[3,4] (test2 and test3)").get)
 
-    println(parseAll(formula,"G[0,1] (test2 and test3)").get)
-    println(parseAll(formula,"F[0,111] (test2 or test3)").get)
+    println(parseAll(mtl_formula,"G[0,1] (test2 and test3)").get)
+    println(parseAll(mtl_formula,"F[0,111] (test2 or test3)").get)
 
-    println(parseAll(formula,"F[0,111] G[0,111] a").get)
+    println(parseAll(mtl_formula,"F[0,111] G[0,111] a").get)
   }
 }
 

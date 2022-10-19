@@ -15,8 +15,8 @@ class DomainOntologySuite extends AnyFunSuite {
     b.number_category("people_number",List(1,6,8))
     b.string_category("etichette",List("stanza di luca","stanza di emilio","stanza di ale"))
 
-    b.signature("stanza_di").with_constant_arg(StringTerm("name")).with_enum_arg(rooms).create
-    b.signature("of").with_enum_arg(rooms).with_interval_arg(1,30).create
+    b.signature("stanza_di").with_constant_arg(StringTerm("name")).with_enum_arg(rooms).create()
+    b.signature("of").with_enum_arg(rooms).with_interval_arg(1,30).create()
 
     val product = b.build()
 

@@ -7,43 +7,43 @@ import scala.util.parsing.combinator.JavaTokenParsers
 
 class FOLFormulaParser extends FOLFormulaParserTrait
 
-trait FOLFormulaParserTrait extends JavaTokenParsers {
-  var b = new FOLBuilder
+trait FOLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
+  private val b = new FOLBuilder
 
-  def formula : Parser[LogicFormula with FOLNature] = exist_formula | foreach_formula | and_formula
+  def fol_formula : Parser[LogicFormula with FOLNature] = fol_exist_formula | fol_foreach_formula | fol_and_formula
 
-  def exist_formula : Parser[LogicFormula with FOLNature] = "exists"~variable_term~","~formula ^^ {case _~v~_~form => b.exists(v,form)}
-  def foreach_formula : Parser[LogicFormula with FOLNature] = "foreach"~variable_term~","~formula ^^ {case _~v~_~form => b.foreach(v,form)}
+  def fol_exist_formula : Parser[LogicFormula with FOLNature] = "exists"~variable_term~","~fol_formula ^^ {case _~v~_~form => b.exists(v,form)}
+  def fol_foreach_formula : Parser[LogicFormula with FOLNature] = "foreach"~variable_term~","~fol_formula ^^ {case _~v~_~form => b.foreach(v,form)}
 
-  def and_formula : Parser[LogicFormula with FOLNature] = or_formula~"and"~not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | or_formula ^^ {x=>x}
-  def or_formula : Parser[LogicFormula with FOLNature] = impl_formula~"or"~not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | impl_formula ^^ {x=>x}
-  def impl_formula : Parser[LogicFormula with FOLNature] = biiml_formula~"->"~not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | biiml_formula ^^ {x=>x}
-  def biiml_formula : Parser[LogicFormula with FOLNature] = not_formula~"<->"~not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | not_formula ^^ {x=>x}
-  def not_formula : Parser[LogicFormula with FOLNature] = "not"~left_formula ^^ {case _~form =>b.not(form) } | left_formula
+  def fol_and_formula : Parser[LogicFormula with FOLNature] = fol_or_formula~"and"~fol_not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | fol_or_formula ^^ { x=>x}
+  def fol_or_formula : Parser[LogicFormula with FOLNature] = fol_impl_formula~"or"~fol_not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | fol_impl_formula ^^ { x=>x}
+  def fol_impl_formula : Parser[LogicFormula with FOLNature] = fol_biiml_formula~"->"~fol_not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | fol_biiml_formula ^^ { x=>x}
+  def fol_biiml_formula : Parser[LogicFormula with FOLNature] = fol_not_formula~"<->"~fol_not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | fol_not_formula ^^ { x=>x}
+  def fol_not_formula : Parser[LogicFormula with FOLNature] = "not"~fol_left_formula ^^ {case _~form =>b.not(form) } | fol_left_formula
 
-  def left_formula : Parser[LogicFormula with FOLNature] = comma_formula | "true" ^^ {_=>b.truth} | "false" ^^ {_=>b.falsity} | predicate
-  def comma_formula : Parser[LogicFormula with FOLNature] = "("~formula~")" ^^ {case _~form~_ => form}
+  def fol_left_formula : Parser[LogicFormula with FOLNature] = fol_comma_formula | "true" ^^ { _=>b.truth} | "false" ^^ { _=>b.falsity} | fol_predicate
+  def fol_comma_formula : Parser[LogicFormula with FOLNature] = "("~fol_formula~")" ^^ {case _~form~_ => form}
 
-  def predicate : Parser[LogicFormula with FOLNature] =
-    functional~"("~args~")" ^^ {case func~_~terms~_ => b.predicate(func,terms)} |
-      functional ^^ {x =>b.predicate(x,List()) }
+  def fol_predicate : Parser[LogicFormula with FOLNature] =
+    fol_functional~"("~fol_args~")" ^^ {case func~_~terms~_ => b.predicate(func,terms)} |
+      fol_functional ^^ { x =>b.predicate(x,List()) }
 
-  def functional : Parser[String] = ident
-  def args : Parser[List[Term]] = repsep(term,",")
+  def fol_functional : Parser[String] = ident
+  def fol_args : Parser[List[Term]] = repsep(fol_term,",")
 
-  def term : Parser[Term] = constant_term | variable_term
+  def fol_term : Parser[Term] = constant_term | variable_term
 
-  def constant_term : Parser[ConstantTerm] =
-    "true" ^^ {_ => TrueTerm()} |
-      "false" ^^ {_ => FalseTerm()} |
-      atom_term |
-      string_term |
-      number_term
-
-  def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
-  def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
-  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
-  def variable_term : Parser[VariableTerm] = "?"~ident ^^ { case _~x => VariableTerm(x)}
+//  def constant_term : Parser[ConstantTerm] =
+//    "true" ^^ {_ => TrueTerm()} |
+//      "false" ^^ {_ => FalseTerm()} |
+//      atom_term |
+//      string_term |
+//      number_term
+//
+//  def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
+//  def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
+//  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
+//  def variable_term : Parser[VariableTerm] = "?"~ident ^^ { case _~x => VariableTerm(x)}
 }
 
 

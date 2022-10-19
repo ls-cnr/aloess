@@ -42,7 +42,7 @@ class DomainOntologyBuilder(name : String) {
     predicate_signature
   }
 
-  def signature(functor : String) = new PredicateSignatureBuilder(functor,categories)
+  def signature(functor : String) = new PredicateSignatureBuilder(functor)
 
   def axiom(consequent:Predicate, rhr:RuleAntecedent): Axiom = {
     val a = Axiom(consequent, rhr)
@@ -50,10 +50,10 @@ class DomainOntologyBuilder(name : String) {
     a
   }
 
-  class PredicateSignatureBuilder(name:String,categories: List[ObjectCategory]) {
+  class PredicateSignatureBuilder(name:String) {
     var arg_types: List[ArgumentType] = List.empty
 
-    def create: Unit = {
+    def create() : Unit = {
       signatures = PredicateSignature(name, arg_types.reverse) :: signatures
     }
 
@@ -63,7 +63,6 @@ class DomainOntologyBuilder(name : String) {
     }
 
     def with_enum_arg(id : String):PredicateSignatureBuilder = {
-      //val cat = get_category_by_name(id)
       arg_types = EnumerableArgument(id) :: arg_types
       this
     }
@@ -73,7 +72,7 @@ class DomainOntologyBuilder(name : String) {
       this
     }
 
-    def with_constant_arg(term: ConstantTerm) = {
+    def with_constant_arg(term: ConstantTerm): PredicateSignatureBuilder = {
       arg_types = ConstantArgument(term) :: arg_types
       this
     }
@@ -93,8 +92,8 @@ object RunBuilder extends App {
   b.number_category("people_number",List(1,6,8))
   b.string_category("etichette",List("stanza di luca","stanza di emilio","stanza di ale"))
 
-  b.signature("stanza_di").with_constant_arg(StringTerm("name")).with_enum_arg(rooms).create
-  b.signature("of").with_enum_arg(rooms).with_interval_arg(1,30).create
+  b.signature("stanza_di").with_constant_arg(StringTerm("name")).with_enum_arg(rooms).create()
+  b.signature("of").with_enum_arg(rooms).with_interval_arg(1,30).create()
 
   val product = b.build()
 

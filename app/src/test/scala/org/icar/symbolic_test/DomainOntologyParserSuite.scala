@@ -13,7 +13,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
-    val result = p.parseAll(p.domain,"domain \"prova1\" {  category \"prova\" atom  [ uno,due,tre ] }")
+    val result = p.parseAll(p.domain,"domain \"prova1\" {  category prova atom  [ uno,due,tre ] }")
     assert(result.successful)
     b.atom_category("prova",List("uno","due","tre"))
     assert(result.get == b.build("prova1"))
@@ -23,7 +23,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
-    val result = p.parseAll(p.domain,"domain \"prova2\" {  category \"prova\" string [ \"uno\",\"due\",\"tre\" ] }")
+    val result = p.parseAll(p.domain,"domain \"prova2\" {  category prova string [ \"uno\",\"due\",\"tre\" ] }")
     assert(result.successful)
     b.string_category("prova",List("uno","due","tre"))
     assert(result.get == b.build("prova2"))
@@ -33,7 +33,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
-    val result = p.parseAll(p.domain,"domain \"prova3\" {  category \"prova\" number [ 1,2,3 ] }")
+    val result = p.parseAll(p.domain,"domain \"prova3\" {  category prova number [ 1,2,3 ] }")
     assert(result.successful)
     b.number_category("prova",List(1,2,3))
     assert(result.get == b.build("prova3"))
@@ -43,7 +43,7 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
-    val result = p.parseAll(p.domain,"domain \"prova4\" {  category \"prova\" mix [ 1,due,\"tre\" ] }")
+    val result = p.parseAll(p.domain,"domain \"prova4\" {  category prova mix [ 1,due,\"tre\" ] }")
     assert(result.successful)
     b.mixed_category("prova",List(NumberTerm(1),AtomTerm("due"),StringTerm("tre")))
     assert(result.get == b.build("prova4"))
@@ -54,10 +54,10 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     val b = new DomainOntologyBuilder("none")
 
     val result = p.parseAll(p.domain,"domain \"prova5\" {  " +
-      "category \"prova\" atom [ uno,due,tre ] " +
-      "category \"prova\" string [ \"uno\",\"due\",\"tre\" ]  " +
-      "category \"prova\" number [ 1,2,3 ]  " +
-      "category \"prova\" mix [ 1,due,\"tre\" ]  " +
+      "category prova atom [ uno,due,tre ] " +
+      "category prova string [ \"uno\",\"due\",\"tre\" ]  " +
+      "category prova number [ 1,2,3 ]  " +
+      "category prova mix [ 1,due,\"tre\" ]  " +
       "}")
     assert(result.successful)
     b.atom_category("prova",List("uno","due","tre"))
@@ -71,9 +71,9 @@ class DomainOntologyParserSuite extends AnyFunSuite {
     val p = new DomainOntologyParser
     val b = new DomainOntologyBuilder("none")
 
-    val result = p.parseAll(p.domain,"domain \"prova6\" {  define \"func\"(enum[\"prova\"],interval[1,4])  }")
+    val result = p.parseAll(p.domain,"domain \"prova6\" {  define func(enum[prova],interval[1,4])  }")
     assert(result.successful)
-    b.signature("func").with_enum_arg("prova").with_interval_arg(1,4).create
+    b.signature("func").with_enum_arg("prova").with_interval_arg(1,4).create()
     assert(result.get == b.build("prova6"))
   }
 

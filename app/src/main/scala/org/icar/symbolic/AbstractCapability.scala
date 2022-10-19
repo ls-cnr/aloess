@@ -19,20 +19,15 @@ package org.icar.symbolic
  */
 case class AbstractCapability(
                                id: String,
-                               //params: List[DomainArgument],
-                               //constraints : List[DomainVariableConstraint],
+                               params: List[CapabilityParameter],
                                pre: LogicFormula with FOLNature,
                                post: LogicFormula with FOLNature,
-                               effects: Array[EvolutionGrounding],
-                               future: List[LogicFormula with LTLNature]
+                               effects: List[EvolutionGrounding],
+                               future: LogicFormula with LTLNature
                              )
 
-/**
- * Builder for empty AbstractCapability
- */
-//object AbstractCapability {
-//  def empty(name: String): AbstractCapability = AbstractCapability(name, List.empty, True(), True(), Array(), List.empty)
-//}
+case class CapabilityParameter(variable : VariableTerm, category : String)
+
 
 /** Class used for describing how an AbstractCapability modifies the current state of the world
  * The evolution represents the changes from W(t) to W(t+1) in terms of add/remove predicates
@@ -40,13 +35,7 @@ case class AbstractCapability(
  * @param name an evolution is marked with a name
  * @param evo  specifies the evolution
  */
-case class EvolutionGrounding(name: String, evo: Array[EvoOperator])
-
-case class ProbabilisticEvolutionGrounding(
-                                            name: String,
-                                            probability: Float,
-                                            evo: Array[EvoOperator]
-                                          )
+case class EvolutionGrounding(name: String, evo: List[EvoOperator], probability: Double = 1)
 
 sealed abstract class EvoOperator
 

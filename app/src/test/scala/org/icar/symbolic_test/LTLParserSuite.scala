@@ -12,7 +12,7 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing universal quantifier and conjunction foreach ?color, human(x,y) and tshirt(?color)") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.formula,"foreach ?color, human(x,y) and tshirt(?color)")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"foreach ?color, human(x,y) and tshirt(?color)")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.foreach(VariableTerm("color"),b.and(
@@ -23,7 +23,7 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing finally F test(a,?b)") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.formula,"F test(a,?b)")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"F test(a,?b)")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.finally_(b.predicate("test",List(AtomTerm("a"),VariableTerm("b")))))
@@ -32,7 +32,7 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing finally/existential/conjunction F (foreach ?color, human(x,y) and tshirt(?color))") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.formula,"F (foreach ?color, human(x,y) and tshirt(?color))")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"F (foreach ?color, human(x,y) and tshirt(?color))")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.finally_(b.foreach(VariableTerm("color"),b.and(
@@ -43,7 +43,7 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing until test1 U test2") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.formula,"test1 U test2")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"test1 U test2")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.until(b.predicate("test1"),b.predicate("test2")))
@@ -52,7 +52,7 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing until/conjunction test1 U (test2 and test3)") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.formula,"test1 U (test2 and test3)")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"test1 U (test2 and test3)")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.until(b.predicate("test1"),b.and(b.predicate("test2"),b.predicate("test3"))))
@@ -61,7 +61,7 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing gobally/conjunction G (test2 and test3)") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.formula,"G (test2 and test3)")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"G (test2 and test3)")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.globally(b.and(b.predicate("test2"),b.predicate("test3"))))
@@ -70,7 +70,7 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing finally/disjunction F (test2 or test3)") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.formula,"F (test2 or test3)")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"F (test2 or test3)")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.finally_(b.or(b.predicate("test2"),b.predicate("test3"))))

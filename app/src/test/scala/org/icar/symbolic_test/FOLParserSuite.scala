@@ -12,7 +12,7 @@ class FOLParserSuite extends AnyFunSuite {
   test("parsing predicate test(a,?b)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.formula,"test(a,?b)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"test(a,?b)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
     assert(f==b.predicate("test",List(AtomTerm("a"),VariableTerm("b"))))
@@ -21,7 +21,7 @@ class FOLParserSuite extends AnyFunSuite {
   test("parsing conjunction/disjunctiuon testA and (testB or testC)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.formula,"testA and (testB or testC)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"testA and (testB or testC)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
     assert(f==b.and(b.predicate("testA",List()),b.or(b.predicate("testB",List()),b.predicate("testC",List()))))
@@ -30,7 +30,7 @@ class FOLParserSuite extends AnyFunSuite {
   test("parsing existential quantifier exists ?x, human(?x,y)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.formula,"exists ?x, human(?x,y)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"exists ?x, human(?x,y)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
     assert(f==b.exists(VariableTerm("x"),b.predicate("human",List(VariableTerm("x"),AtomTerm("y")))))
@@ -39,7 +39,7 @@ class FOLParserSuite extends AnyFunSuite {
   test("parsing universal quantifier and conjunction foreach ?color, human(x,y) and tshirt(?color)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.formula,"foreach ?color, human(x,y) and tshirt(?color)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"foreach ?color, human(x,y) and tshirt(?color)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
     assert(f==b.foreach(VariableTerm("color"),b.and(
@@ -50,7 +50,7 @@ class FOLParserSuite extends AnyFunSuite {
   test("parsing universal/universal/conjunction foreach ?color, exists ?y, human(?y) and tshirt(?y,?color)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.formula,"foreach ?color, exists ?y, human(?y) and tshirt(?y,?color)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"foreach ?color, exists ?y, human(?y) and tshirt(?y,?color)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
     assert(f==b.foreach(VariableTerm("color"),b.exists(VariableTerm("y"),b.and(

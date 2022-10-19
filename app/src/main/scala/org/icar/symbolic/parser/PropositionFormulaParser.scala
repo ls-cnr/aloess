@@ -7,8 +7,8 @@ import scala.util.parsing.combinator.JavaTokenParsers
 
 class PropositionFormulaParser extends PropositionFormulaParserTrait
 
-trait PropositionFormulaParserTrait extends JavaTokenParsers {
-  val b = new PropositionBuilder
+trait PropositionFormulaParserTrait extends JavaTokenParsers with TermParserTrait {
+  private val b = new PropositionBuilder
 
   def formula : Parser[LogicFormula with PropositionNature] = or_formula ^^ {x=>x}
   def or_formula : Parser[LogicFormula with PropositionNature] = and_formula~"or"~not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | and_formula ^^ {x=>x}
@@ -27,18 +27,18 @@ trait PropositionFormulaParserTrait extends JavaTokenParsers {
 
   def args : Parser[List[ConstantTerm]] = repsep(constant_term,",")
 
-  def constant_term : Parser[ConstantTerm] =
-    "true" ^^ {_ => TrueTerm()} |
-      "false" ^^ {_ => FalseTerm()} |
-      atom_term |
-      string_term |
-      number_term
-
-  def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
-
-  def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
-
-  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
+//  def constant_term : Parser[ConstantTerm] =
+//    "true" ^^ {_ => TrueTerm()} |
+//      "false" ^^ {_ => FalseTerm()} |
+//      atom_term |
+//      string_term |
+//      number_term
+//
+//  def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
+//
+//  def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
+//
+//  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
 }
 
 
