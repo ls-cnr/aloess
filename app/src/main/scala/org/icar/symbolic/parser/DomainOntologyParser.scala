@@ -1,7 +1,7 @@
 package org.icar.symbolic.parser
 
-import org.icar.symbolic.builder.DomainOntologyBuilder
 import org.icar.symbolic._
+import org.icar.symbolic.builder.DomainOntologyBuilder
 
 import scala.util.parsing.combinator.JavaTokenParsers
 

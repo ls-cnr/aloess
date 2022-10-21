@@ -1,8 +1,7 @@
 package org.icar.symbolic_test
 
 import org.icar.symbolic._
-import org.icar.symbolic.builder.DomainOntologyBuilder
-import org.icar.symbolic.parser.{AbstractCapabilityParser, DomainOntologyParser}
+import org.icar.symbolic.parser.AbstractCapabilityParser
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner

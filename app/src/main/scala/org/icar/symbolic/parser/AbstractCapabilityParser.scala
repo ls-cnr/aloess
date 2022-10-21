@@ -1,6 +1,6 @@
 package org.icar.symbolic.parser
 
-import org.icar.symbolic.{AbstractCapability, AddOperator, CapabilityParameter, EvoOperator, EvolutionGrounding, FOLNature, LTLNature, LogicFormula, Predicate, RmvOperator, True}
+import org.icar.symbolic._
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
