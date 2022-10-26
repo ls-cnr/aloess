@@ -37,6 +37,7 @@ case class Negation(formula : LogicFormula) extends LogicFormula with Propositio
 	override def isGround: Boolean = formula.isGround
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = Negation(formula.apply_substitution(assignments))
 }
+
 case class Conjunction(formulas : List[LogicFormula]) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "("+formulas.mkString(" and ")+")"
 	override def isGround: Boolean = {
@@ -47,6 +48,12 @@ case class Conjunction(formulas : List[LogicFormula]) extends LogicFormula with 
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
 		val treated_formulas = for (f <- formulas) yield f.apply_substitution(assignments)
 		Conjunction(treated_formulas)
+	}
+	def normal_form_two_terms : Conjunction = {
+		if (formulas.size<=2)
+			this
+		else
+			Conjunction(List(formulas.head,Conjunction(formulas.tail).normal_form_two_terms))
 	}
 }
 case class Disjunction(formulas : List[LogicFormula]) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
@@ -60,6 +67,12 @@ case class Disjunction(formulas : List[LogicFormula]) extends LogicFormula with 
 		val treated_formulas = for (f <- formulas) yield f.apply_substitution(assignments)
 		Disjunction(treated_formulas)
 	}
+	def normal_form_two_terms : Disjunction = {
+		if (formulas.size<=2)
+			this
+		else
+			Disjunction(List(formulas.head,Disjunction(formulas.tail).normal_form_two_terms))
+	}
 }
 case class ExclDisj(formulas : List[LogicFormula]) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "("+formulas.mkString(" xor ")+")"
@@ -71,6 +84,12 @@ case class ExclDisj(formulas : List[LogicFormula]) extends LogicFormula with Pro
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
 		val treated_formulas = for (f <- formulas) yield f.apply_substitution(assignments)
 		ExclDisj(treated_formulas)
+	}
+	def normal_form_two_terms : ExclDisj = {
+		if (formulas.size<=2)
+			this
+		else
+			ExclDisj(List(formulas.head,ExclDisj(formulas.tail).normal_form_two_terms))
 	}
 }
 case class Implication(l:LogicFormula, r:LogicFormula) extends LogicFormula with PropositionNature with FOLNature with LTLNature with MTLNature {
@@ -147,12 +166,22 @@ case class ExistQuantifier(variable: VariableTerm, formula : LogicFormula) exten
 	override def toString: String = "\u2203 "+variable+":"+formula
 	override def isGround: Boolean = formula.isGround
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = ExistQuantifier(variable,formula.apply_substitution(assignments))
+	def apply_category(cat : ObjectCategory) : LogicFormula = {
+		val range: List[ConstantTerm] = cat.range
+		val conj = for (t <- range) yield apply_substitution(Map(variable -> t))
+		Disjunction(conj)
+	}
 }
 
 case class UnivQuantifier(variable : VariableTerm, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
 	override def toString: String = "\u2200 "+variable+":"+formula
 	override def isGround: Boolean = formula.isGround
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = UnivQuantifier(variable,formula.apply_substitution(assignments))
+	def apply_category(cat : ObjectCategory) : LogicFormula = {
+		val range: List[ConstantTerm] = cat.range
+		val conj = for (t <- range) yield apply_substitution(Map(variable -> t))
+		Conjunction(conj)
+	}
 }
 
 
