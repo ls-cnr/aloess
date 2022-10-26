@@ -2,7 +2,7 @@ package org.icar.symbolic
 
 case class DomainOntology(name:String, signatures : List[PredicateSignature], categories: List[ObjectCategory], axioms : List[Axiom]) {
   def get_category_by_name(id : String) : ObjectCategory = {
-    val selected = categories.filter( x => x.name != id )
+    val selected = categories.filter( x => x.name == id )
     if (selected.isEmpty) throw new InvalidCategory()
     if (selected.size > 1) throw new RedundantCategory()
     selected.head

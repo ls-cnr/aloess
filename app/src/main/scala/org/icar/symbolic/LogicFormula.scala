@@ -133,7 +133,7 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 
 				case _ => throw new NotSupportedTerm("not supported term type")
 			}
-		Predicate(functional,treated_terms)
+		Predicate(functional,treated_terms.reverse)
 	}
 
 	@throws(classOf[PredicateGroundingError])
@@ -168,7 +168,7 @@ case class ExistQuantifier(variable: VariableTerm, formula : LogicFormula) exten
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = ExistQuantifier(variable,formula.apply_substitution(assignments))
 	def apply_category(cat : ObjectCategory) : LogicFormula = {
 		val range: List[ConstantTerm] = cat.range
-		val conj = for (t <- range) yield apply_substitution(Map(variable -> t))
+		val conj = for (t <- range) yield apply_substitution(Map(variable -> t)).asInstanceOf[ExistQuantifier].formula
 		Disjunction(conj)
 	}
 }
@@ -179,7 +179,7 @@ case class UnivQuantifier(variable : VariableTerm, formula : LogicFormula) exten
 	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = UnivQuantifier(variable,formula.apply_substitution(assignments))
 	def apply_category(cat : ObjectCategory) : LogicFormula = {
 		val range: List[ConstantTerm] = cat.range
-		val conj = for (t <- range) yield apply_substitution(Map(variable -> t))
+		val conj = for (t <- range) yield apply_substitution(Map(variable -> t)).asInstanceOf[UnivQuantifier].formula
 		Conjunction(conj)
 	}
 }
