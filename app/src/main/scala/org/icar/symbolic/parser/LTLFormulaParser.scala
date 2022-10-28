@@ -12,8 +12,8 @@ trait LTLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
 
   def ltl_formula : Parser[LogicFormula with LTLNature] = ltl_exist_formula | ltl_foreach_formula | ltl_until_formula
 
-  def ltl_exist_formula : Parser[LogicFormula with LTLNature] = "exists"~variable_term~","~ltl_formula ^^ {case _~v~_~form => b.exists(v,form)}
-  def ltl_foreach_formula : Parser[LogicFormula with LTLNature] = "foreach"~variable_term~","~ltl_formula ^^ {case _~v~_~form => b.foreach(v,form)}
+  def ltl_exist_formula : Parser[LogicFormula with LTLNature] = "exists"~variable_def~","~ltl_formula ^^ {case _~v~_~form => b.exists(v.var_name,v.var_domain,form)}
+  def ltl_foreach_formula : Parser[LogicFormula with LTLNature] = "foreach"~variable_def~","~ltl_formula ^^ {case _~v~_~form => b.foreach(v.var_name,v.var_domain,form)}
 
   def ltl_until_formula : Parser[LogicFormula with LTLNature] = ltl_release_formula~"U"~ltl_not_formula ^^ {case form1~_~form2 => b.until(form1,form2)} | ltl_release_formula ^^ { x=>x}
   def ltl_release_formula : Parser[LogicFormula with LTLNature] = ltl_and_formula~"R"~ltl_not_formula ^^ {case form1~_~form2 => b.release(form1,form2)} | ltl_and_formula ^^ { x=>x}

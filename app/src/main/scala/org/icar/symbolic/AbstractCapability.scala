@@ -29,6 +29,9 @@ case class AbstractCapability(
 case class CapabilityParameter(variable : VariableTerm, category : String)
 
 
+case class CapabilityParameterEntry(variable : VariableTerm, value : ConstantTerm)
+case class CapabilityEntry(cap:AbstractCapability, pars : List[CapabilityParameterEntry])
+
 /** Class used for describing how an AbstractCapability modifies the current state of the world
  * The evolution represents the changes from W(t) to W(t+1) in terms of add/remove predicates
  *

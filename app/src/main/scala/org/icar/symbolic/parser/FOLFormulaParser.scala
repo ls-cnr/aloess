@@ -12,8 +12,8 @@ trait FOLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
 
   def fol_formula : Parser[LogicFormula with FOLNature] = fol_exist_formula | fol_foreach_formula | fol_and_formula
 
-  def fol_exist_formula : Parser[LogicFormula with FOLNature] = "exists"~variable_term~","~fol_formula ^^ {case _~v~_~form => b.exists(v,form)}
-  def fol_foreach_formula : Parser[LogicFormula with FOLNature] = "foreach"~variable_term~","~fol_formula ^^ {case _~v~_~form => b.foreach(v,form)}
+  def fol_exist_formula : Parser[LogicFormula with FOLNature] = "exists"~variable_def~","~fol_formula ^^ {case _~v~_~form => b.exists(v.var_name,v.var_domain,form)}
+  def fol_foreach_formula : Parser[LogicFormula with FOLNature] = "foreach"~variable_def~","~fol_formula ^^ {case _~v~_~form => b.foreach(v.var_name,v.var_domain,form)}
 
   def fol_and_formula : Parser[LogicFormula with FOLNature] = fol_or_formula~"and"~fol_not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | fol_or_formula ^^ { x=>x}
   def fol_or_formula : Parser[LogicFormula with FOLNature] = fol_impl_formula~"or"~fol_not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | fol_impl_formula ^^ { x=>x}
@@ -33,17 +33,6 @@ trait FOLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
 
   def fol_term : Parser[Term] = constant_term | variable_term
 
-//  def constant_term : Parser[ConstantTerm] =
-//    "true" ^^ {_ => TrueTerm()} |
-//      "false" ^^ {_ => FalseTerm()} |
-//      atom_term |
-//      string_term |
-//      number_term
-//
-//  def atom_term : Parser[AtomTerm] = ident ^^ {x => AtomTerm(x)}
-//  def string_term : Parser[StringTerm] = stringLiteral ^^ {x => StringTerm(x.substring(1,x.length-1))}
-//  def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
-//  def variable_term : Parser[VariableTerm] = "?"~ident ^^ { case _~x => VariableTerm(x)}
 }
 
 

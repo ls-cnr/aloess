@@ -12,10 +12,10 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing universal quantifier and conjunction foreach ?color, human(x,y) and tshirt(?color)") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"foreach ?color, human(x,y) and tshirt(?color)")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"foreach ?color in Color, human(x,y) and tshirt(?color)")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
-    assert(f==b.foreach(VariableTerm("color"),b.and(
+    assert(f==b.foreach("color","Color",b.and(
       b.predicate("human",List(AtomTerm("x"),AtomTerm("y"))),
       b.predicate("tshirt",List(VariableTerm("color"))))))
   }
@@ -32,10 +32,10 @@ class LTLParserSuite extends AnyFunSuite {
   test("parsing finally/existential/conjunction F (foreach ?color, human(x,y) and tshirt(?color))") {
     val parser = new LTLFormulaParser
     val b = new LTLBuilder
-    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"F (foreach ?color, human(x,y) and tshirt(?color))")
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"F (foreach ?color in Color, human(x,y) and tshirt(?color))")
     assert(result.successful)
     val f : LogicFormula with LTLNature = result.get
-    assert(f==b.finally_(b.foreach(VariableTerm("color"),b.and(
+    assert(f==b.finally_(b.foreach("color","Color",b.and(
       b.predicate("human",List(AtomTerm("x"),AtomTerm("y"))),
       b.predicate("tshirt",List(VariableTerm("color")))))))
   }

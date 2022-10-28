@@ -120,7 +120,7 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 	}
 
 	@throws(classOf[NotSupportedTerm])
-	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = {
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): Predicate = {
 		var treated_terms : List[Term] = List.empty
 		for (t<-terms)
 			t match {
@@ -162,27 +162,29 @@ case class Predicate(functional:String, terms: List[Term] ) extends LogicFormula
 	}
 }
 
-case class ExistQuantifier(variable: VariableTerm, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
-	override def toString: String = "\u2203 "+variable+":"+formula
+case class ExistQuantifier(variable_def: VariableDef, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
+	override def toString: String = "\u2203 "+variable_def.var_name+" in "+variable_def.var_domain+":"+formula
 	override def isGround: Boolean = formula.isGround
-	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = ExistQuantifier(variable,formula.apply_substitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = ExistQuantifier(variable_def,formula.apply_substitution(assignments))
 	def apply_category(cat : ObjectCategory) : LogicFormula = {
 		val range: List[ConstantTerm] = cat.range
-		val conj = for (t <- range) yield apply_substitution(Map(variable -> t)).asInstanceOf[ExistQuantifier].formula
+		val conj = for (t <- range) yield apply_substitution(Map(VariableTerm(variable_def.var_name) -> t)).asInstanceOf[ExistQuantifier].formula
 		Disjunction(conj)
 	}
 }
 
-case class UnivQuantifier(variable : VariableTerm, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
-	override def toString: String = "\u2200 "+variable+":"+formula
+case class UnivQuantifier(variable_def : VariableDef, formula : LogicFormula) extends LogicFormula with FOLNature with LTLNature with MTLNature {
+	override def toString: String = "\u2200 "+variable_def.var_name+" in "+variable_def.var_domain+":"+formula
 	override def isGround: Boolean = formula.isGround
-	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = UnivQuantifier(variable,formula.apply_substitution(assignments))
+	override def apply_substitution(assignments : Map[VariableTerm,ConstantTerm]): LogicFormula = UnivQuantifier(variable_def,formula.apply_substitution(assignments))
 	def apply_category(cat : ObjectCategory) : LogicFormula = {
 		val range: List[ConstantTerm] = cat.range
-		val conj = for (t <- range) yield apply_substitution(Map(variable -> t)).asInstanceOf[UnivQuantifier].formula
+		val conj = for (t <- range) yield apply_substitution(Map(VariableTerm(variable_def.var_name) -> t)).asInstanceOf[UnivQuantifier].formula
 		Conjunction(conj)
 	}
 }
+
+case class VariableDef(var_name : String, var_domain : String)
 
 
 /* LTL components */

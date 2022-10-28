@@ -1,9 +1,8 @@
 package org.icar.subsymbolic_test
 
-import org.icar.subsymbolic.{RawConj, RawDisj, RawNeg, RawProposition}
 import org.icar.subsymbolic.builder.{SubSymbolicBuilder, UnsupportedRawConversion}
+import org.icar.subsymbolic.{RawConj, RawDisj, RawNeg, RawProposition}
 import org.icar.symbolic._
-import org.icar.symbolic.builder.DomainOntologyBuilder
 import org.icar.symbolic.parser.DomainOntologyParser
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
@@ -79,7 +78,7 @@ class SubSymBuilderSuite extends AnyFunSuite {
     val builder = new SubSymbolicBuilder(onto)
     val sensor_id = onto.get_category_by_name("sensor_id")
     val raw = builder.formula(
-      ExistQuantifier(VariableTerm("x"),Predicate("location",List(VariableTerm("x"),StringTerm("bedroom"))))
+      ExistQuantifier(VariableDef("x","ID"),Predicate("location",List(VariableTerm("x"),StringTerm("bedroom"))))
       ,Map("x"->sensor_id))
     assert(raw == RawDisj(RawProposition(2),RawDisj(RawProposition(5),RawProposition(8))))
   }
@@ -88,16 +87,28 @@ class SubSymBuilderSuite extends AnyFunSuite {
     val builder = new SubSymbolicBuilder(onto)
     val rooms = onto.get_category_by_name("rooms")
     val raw = builder.formula(
-      UnivQuantifier(VariableTerm("x"),Predicate("location",List(NumberTerm(2),VariableTerm("x"))))
+      UnivQuantifier(VariableDef("x","ID"),Predicate("location",List(NumberTerm(2),VariableTerm("x"))))
       ,Map("x"->rooms))
     assert(raw == RawConj(RawProposition(3),RawConj(RawProposition(4),RawProposition(5))))
   }
 
-  test("subsymbolic exist-quantifier/conjunction conversion") {
+  test("subsymbolic exist-exist/conjunction conversion") {
+    val builder = new SubSymbolicBuilder(onto)
+    val rooms = onto.get_category_by_name("rooms")
+    val sensor_id = onto.get_category_by_name("sensor_id")
+    val raw = builder.formula(
+      ExistQuantifier(VariableDef("x","ID"),
+        ExistQuantifier(VariableDef("y","String"),
+          Predicate("location",List(VariableTerm("x"),VariableTerm("y"))))
+      ),Map("x"->sensor_id, "y"->rooms))
+    assert(raw == RawDisj(RawDisj(RawProposition(0),RawDisj(RawProposition(1),RawProposition(2))),RawDisj(RawDisj(RawProposition(3),RawDisj(RawProposition(4),RawProposition(5))),RawDisj(RawProposition(6),RawDisj(RawProposition(7),RawProposition(8))))))
+  }
+
+  test("subsymbolic exist/foreach conversion") {
     val builder = new SubSymbolicBuilder(onto)
     val sensor_id = onto.get_category_by_name("sensor_id")
     val raw = builder.formula(
-      ExistQuantifier(VariableTerm("x"),Conjunction(List(
+      ExistQuantifier(VariableDef("x","ID"),Conjunction(List(
         Predicate("location",List(VariableTerm("x"),StringTerm("bedroom"))),
         Predicate("location",List(VariableTerm("x"),StringTerm("kitchen")))
       ))),Map("x"->sensor_id))

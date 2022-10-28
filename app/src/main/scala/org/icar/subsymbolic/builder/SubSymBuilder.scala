@@ -2,7 +2,6 @@ package org.icar.subsymbolic.builder
 
 import org.icar.subsymbolic._
 import org.icar.symbolic._
-import org.icar.symbolic.parser.DomainOntologyParser
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -42,7 +41,6 @@ class SubSymbolicBuilder(val onto : DomainOntology) {
   }
 
   private def register(f: PredicateSignature, assigned: Map[ArgumentType, ConstantTerm]): Unit = {
-
     val ground_args: List[ConstantTerm] = for (a <- f.arg_types) yield assigned(a)
     val p = Proposition(f.functor_name,ground_args)
 
@@ -72,12 +70,12 @@ class SubSymbolicBuilder(val onto : DomainOntology) {
         RawIff(formula(left,sets),formula(right,sets))
 
       case ExistQuantifier(variable,form) =>
-        val cat = sets(variable.name)
+        val cat = sets(variable.var_name)
         val normal = ExistQuantifier(variable,form).apply_category(cat)
         formula(normal,sets)
 
       case UnivQuantifier(variable,form) =>
-        val cat = sets(variable.name)
+        val cat = sets(variable.var_name)
         val normal = UnivQuantifier(variable,form).apply_category(cat)
         formula(normal,sets)
 
@@ -87,13 +85,15 @@ class SubSymbolicBuilder(val onto : DomainOntology) {
 
   }
 
-  private def formula_predicate(p: Predicate): RawProposition = {
+  def formula_predicate(p: Predicate): RawProposition = {
     if (p.isGround) {
       val prop = p.to_proposition(Map.empty)
       RawProposition(direct(prop))
     } else
       throw new PredicateMustBeGrounded(p)
   }
+
+
 }
 
 
@@ -104,80 +104,87 @@ class UnsupportedRawConversion(f : LogicFormula) extends Exception
 
 
 
-
-object RunSubSymBuilder extends App {
-  val p = new DomainOntologyParser
-
-  val onto_parser = p.parseAll(p.domain,"domain \"prova5\" {  " +
-    "category users atom [ luca,john,claudia ] " +
-    "category rooms string [ \"livingroom\",\"kitchen\",\"bedroom\" ]  " +
-    "category sensor_id number [ 1,2,3 ]  " +
-
-    "define location(enum[sensor_id],enum[rooms])" +
-
-    "}")
-
-  onto_parser match {
-    case p.Failure(msg,_) => println(s"FAILURE: $msg")
-    case p.Error(msg,_) => println(s"ERROR: $msg")
-
-    case p.Success(matched,_) =>
-      println(matched)
-      val onto = onto_parser.get
-      val builder = new SubSymbolicBuilder(onto)
-      println(builder.inverse)
-
-      val raw = builder.formula( Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))), Map.empty )
-      println(raw)
-
-      val raw2 = builder.formula(
-        Conjunction(List(
-          Predicate("location",List(NumberTerm(1),StringTerm("bedroom"))),
-          Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))),
-          Predicate("location",List(NumberTerm(2),StringTerm("kitchen"))))
-        ),Map.empty)
-      println(raw2)
-
-      val raw3 = builder.formula(
-        Disjunction(List(
-          Predicate("location",List(NumberTerm(1),StringTerm("bedroom"))),
-          Conjunction(List(
-            Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))),
-            Predicate("location",List(NumberTerm(2),StringTerm("kitchen"))))
-          ))
-         ),Map.empty)
-      println(raw3)
-
-      val raw4 = builder.formula(
-        Negation(
-          Disjunction(List(
-            Predicate("location",List(NumberTerm(1),StringTerm("bedroom"))),
-            Conjunction(List(
-              Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))),
-              Predicate("location",List(NumberTerm(2),StringTerm("kitchen"))))
-            ))
-        )),Map.empty)
-      println(raw4)
-
-      val sensor_id = onto.get_category_by_name("sensor_id")
-      val raw5 = builder.formula(
-        ExistQuantifier(VariableTerm("x"),Predicate("location",List(VariableTerm("x"),StringTerm("bedroom"))))
-        ,Map("x"->sensor_id))
-      println(raw5)
-
-      val rooms = onto.get_category_by_name("rooms")
-      val raw6 = builder.formula(
-        UnivQuantifier(VariableTerm("x"),Predicate("location",List(NumberTerm(2),VariableTerm("x"))))
-        ,Map("x"->rooms))
-      println(raw6)
-
-      val raw7 = builder.formula(
-        ExistQuantifier(VariableTerm("x"),Conjunction(List(
-          Predicate("location",List(VariableTerm("x"),StringTerm("bedroom"))),
-          Predicate("location",List(VariableTerm("x"),StringTerm("kitchen")))
-        ))),Map("x"->sensor_id))
-      println(raw7)
-
-  }
-
-}
+//
+//object RunSubSymBuilder extends App {
+//  val p = new DomainOntologyParser
+//
+//  val onto_parser = p.parseAll(p.domain,"domain \"prova5\" {  " +
+//    "category users atom [ luca,john,claudia ] " +
+//    "category rooms string [ \"livingroom\",\"kitchen\",\"bedroom\" ]  " +
+//    "category sensor_id number [ 1,2,3 ]  " +
+//
+//    "define location(enum[sensor_id],enum[rooms])" +
+//
+//    "}")
+//
+//  onto_parser match {
+//    case p.Failure(msg,_) => println(s"FAILURE: $msg")
+//    case p.Error(msg,_) => println(s"ERROR: $msg")
+//
+//    case p.Success(matched,_) =>
+//      println(matched)
+//      val onto = onto_parser.get
+//      val builder = new SubSymbolicBuilder(onto)
+//      println(builder.inverse)
+//
+//      val raw = builder.formula( Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))), Map.empty )
+//      println(raw)
+//
+//      val raw2 = builder.formula(
+//        Conjunction(List(
+//          Predicate("location",List(NumberTerm(1),StringTerm("bedroom"))),
+//          Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))),
+//          Predicate("location",List(NumberTerm(2),StringTerm("kitchen"))))
+//        ),Map.empty)
+//      println(raw2)
+//
+//      val raw3 = builder.formula(
+//        Disjunction(List(
+//          Predicate("location",List(NumberTerm(1),StringTerm("bedroom"))),
+//          Conjunction(List(
+//            Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))),
+//            Predicate("location",List(NumberTerm(2),StringTerm("kitchen"))))
+//          ))
+//         ),Map.empty)
+//      println(raw3)
+//
+//      val raw4 = builder.formula(
+//        Negation(
+//          Disjunction(List(
+//            Predicate("location",List(NumberTerm(1),StringTerm("bedroom"))),
+//            Conjunction(List(
+//              Predicate("location",List(NumberTerm(2),StringTerm("bedroom"))),
+//              Predicate("location",List(NumberTerm(2),StringTerm("kitchen"))))
+//            ))
+//        )),Map.empty)
+//      println(raw4)
+//
+//      val sensor_id = onto.get_category_by_name("sensor_id")
+//      val raw5 = builder.formula(
+//        ExistQuantifier(VariableTerm("x"),Predicate("location",List(VariableTerm("x"),StringTerm("bedroom"))))
+//        ,Map("x"->sensor_id))
+//      println(raw5)
+//
+//      val rooms = onto.get_category_by_name("rooms")
+//      val raw6 = builder.formula(
+//        UnivQuantifier(VariableTerm("x"),Predicate("location",List(NumberTerm(2),VariableTerm("x"))))
+//        ,Map("x"->rooms))
+//      println(raw6)
+//
+//      val raw7 = builder.formula(
+//        ExistQuantifier(VariableTerm("x"),Conjunction(List(
+//          Predicate("location",List(VariableTerm("x"),StringTerm("bedroom"))),
+//          Predicate("location",List(VariableTerm("x"),StringTerm("kitchen")))
+//        ))),Map("x"->sensor_id))
+//      println(raw7)
+//
+//      val raw8 = builder.formula(
+//        ExistQuantifier(VariableTerm("x"),
+//          ExistQuantifier(VariableTerm("y"),
+//            Predicate("location",List(VariableTerm("x"),VariableTerm("y"))))
+//        ),Map("x"->sensor_id, "y"->rooms))
+//      println(raw8)
+//
+//  }
+//
+//}

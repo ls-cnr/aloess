@@ -30,19 +30,19 @@ class FOLParserSuite extends AnyFunSuite {
   test("parsing existential quantifier exists ?x, human(?x,y)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"exists ?x, human(?x,y)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"exists ?x in Name, human(?x,y)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
-    assert(f==b.exists(VariableTerm("x"),b.predicate("human",List(VariableTerm("x"),AtomTerm("y")))))
+    assert(f==b.exists("x","Name",b.predicate("human",List(VariableTerm("x"),AtomTerm("y")))))
   }
 
   test("parsing universal quantifier and conjunction foreach ?color, human(x,y) and tshirt(?color)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"foreach ?color, human(x,y) and tshirt(?color)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"foreach ?color in Color, human(x,y) and tshirt(?color)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
-    assert(f==b.foreach(VariableTerm("color"),b.and(
+    assert(f==b.foreach("color","Color",b.and(
       b.predicate("human",List(AtomTerm("x"),AtomTerm("y"))),
       b.predicate("tshirt",List(VariableTerm("color"))))))
   }
@@ -50,10 +50,10 @@ class FOLParserSuite extends AnyFunSuite {
   test("parsing universal/universal/conjunction foreach ?color, exists ?y, human(?y) and tshirt(?y,?color)") {
     val parser = new FOLFormulaParser
     val b = new FOLBuilder
-    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"foreach ?color, exists ?y, human(?y) and tshirt(?y,?color)")
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"foreach ?color in Color, exists ?y in Name, human(?y) and tshirt(?y,?color)")
     assert(result.successful)
     val f : LogicFormula with FOLNature = result.get
-    assert(f==b.foreach(VariableTerm("color"),b.exists(VariableTerm("y"),b.and(
+    assert(f==b.foreach("color","Color",b.exists("y","Name",b.and(
       b.predicate("human",List(VariableTerm("y"))),
       b.predicate("tshirt",List(VariableTerm("y"),VariableTerm("color")))))))
   }

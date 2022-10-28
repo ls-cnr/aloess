@@ -19,4 +19,6 @@ trait TermParserTrait extends JavaTokenParsers {
   def string_term : Parser[StringTerm] = stringLiteralDrimmed ^^ {x => StringTerm(x)}
   def number_term : Parser[NumberTerm] = floatingPointNumber ^^ { n => NumberTerm(n.toDouble)}
   def variable_term : Parser[VariableTerm] = "?"~ident ^^ { case _~x => VariableTerm(x)}
+
+  def variable_def : Parser[VariableDef] = variable_term~"in"~ident ^^ {case v~_~domain => VariableDef(v.name,domain)}
 }

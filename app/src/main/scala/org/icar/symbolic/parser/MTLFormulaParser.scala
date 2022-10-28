@@ -12,8 +12,8 @@ trait MTLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
 
   def mtl_formula : Parser[LogicFormula with MTLNature] = mtl_exist_formula | mtl_foreach_formula | mtl_until_formula
 
-  def mtl_exist_formula : Parser[LogicFormula with MTLNature] = "exists"~variable_term~","~mtl_formula ^^ {case _~v~_~form => b.exists(v,form)}
-  def mtl_foreach_formula : Parser[LogicFormula with MTLNature] = "foreach"~variable_term~","~mtl_formula ^^ {case _~v~_~form => b.foreach(v,form)}
+  def mtl_exist_formula : Parser[LogicFormula with MTLNature] = "exists"~variable_def~","~mtl_formula ^^ {case _~v~_~form => b.exists(v.var_name,v.var_domain,form)}
+  def mtl_foreach_formula : Parser[LogicFormula with MTLNature] = "foreach"~variable_def~","~mtl_formula ^^ {case _~v~_~form => b.foreach(v.var_name,v.var_domain,form)}
 
   def mtl_until_formula : Parser[LogicFormula with MTLNature] = mtl_release_formula~"U"~mtl_interval~mtl_not_formula ^^ {case form1~_~interv~form2 => b.until(form1,form2,interv)} | mtl_release_formula ^^ { x=>x}
   def mtl_release_formula : Parser[LogicFormula with MTLNature] = mtl_and_formula~"R"~mtl_interval~mtl_not_formula ^^ {case form1~_~interv~form2 => b.release(form1,form2,interv)} | mtl_and_formula ^^ { x=>x}

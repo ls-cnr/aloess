@@ -17,8 +17,8 @@ class FOLFormulaSuite extends AnyFunSuite {
 
   test("building 'exists' formula") {
     val b = new FOLBuilder
-    val formula = b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer"))))
-    assert(formula == UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer")))))
+    val formula = b.foreach("integer","Int", b.predicate("test",List(VariableTerm("integer"))))
+    assert(formula == UnivQuantifier(VariableDef("integer","Int"),Predicate("test",List(VariableTerm("integer")))))
   }
 
   test("predicate translates to proposition") {
@@ -45,11 +45,11 @@ class FOLFormulaSuite extends AnyFunSuite {
 
   test("FOL formula apply sobstitutions") {
     val b = new FOLBuilder
-    val formula = b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string")))))
+    val formula = b.foreach("integer","Int", b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string")))))
 
     val assign_map = Map(VariableTerm("integer") -> NumberTerm(10))
     assert(formula.apply_substitution(assign_map)==
-      UnivQuantifier(VariableTerm("integer"),
+      UnivQuantifier(VariableDef("integer","Int"),
         Conjunction(List(
           Predicate("test1",List(NumberTerm(10))),
           Predicate("test2",List(VariableTerm("string"))))))

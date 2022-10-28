@@ -10,14 +10,14 @@ import org.scalatestplus.junit.JUnitRunner
 class MTLFormulaSuite extends AnyFunSuite {
   test("building MTL formula without temporal operators") {
     val b = new MTLBuilder
-    val formula = b.implies(b.predicate("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer")))))
-    assert(formula == Implication( Predicate("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer"))))))
+    val formula = b.implies(b.predicate("test",List()),b.foreach("integer","Int", b.predicate("test",List(VariableTerm("integer")))))
+    assert(formula == Implication( Predicate("test",List()),UnivQuantifier(VariableDef("integer","Int"),Predicate("test",List(VariableTerm("integer"))))))
   }
 
   test("building MTL formula with Metric Finally") {
     val b = new MTLBuilder
-    val formula = b.finally_(b.and(b.predicate("test",List()),b.foreach(VariableTerm("integer"), b.predicate("test",List(VariableTerm("integer"))))),MetricInterval(1,5))
-    assert(formula == MetricFinally(Conjunction(List(Predicate("test",List()),UnivQuantifier(VariableTerm("integer"),Predicate("test",List(VariableTerm("integer")))))),MetricInterval(1,5)) )
+    val formula = b.finally_(b.and(b.predicate("test",List()),b.foreach("integer","Int", b.predicate("test",List(VariableTerm("integer"))))),MetricInterval(1,5))
+    assert(formula == MetricFinally(Conjunction(List(Predicate("test",List()),UnivQuantifier(VariableDef("integer","Int"),Predicate("test",List(VariableTerm("integer")))))),MetricInterval(1,5)) )
   }
 
   test("building nested MTL formulas") {
@@ -28,11 +28,11 @@ class MTLFormulaSuite extends AnyFunSuite {
 
   test("MTL formula apply sobstitutions") {
     val b = new MTLBuilder
-    val formula = b.globally(b.foreach(VariableTerm("integer"), b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string"))))),MetricInterval(1,5))
+    val formula = b.globally(b.foreach("integer","Int", b.and(b.predicate("test1",List(VariableTerm("integer"))), b.predicate("test2",List(VariableTerm("string"))))),MetricInterval(1,5))
 
     val assign_map = Map(VariableTerm("integer") -> NumberTerm(10))
     assert(formula.apply_substitution(assign_map)==MetricGlobally(
-      UnivQuantifier(VariableTerm("integer"),
+      UnivQuantifier(VariableDef("integer","Int"),
         Conjunction(List(
           Predicate("test1",List(NumberTerm(10))),
           Predicate("test2",List(VariableTerm("string")))))),MetricInterval(1,5)))

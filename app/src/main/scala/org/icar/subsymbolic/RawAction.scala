@@ -1,8 +1,8 @@
 package org.icar.subsymbolic
 
-case class RawAction(id:String,pre:RawLogicFormula,effects:Array[RawEvolution],invariants:List[RawLogicFormula])
+case class RawAction(id:Int,pre:RawLogicFormula,effects:List[RawEvolution],invariant:RawLogicFormula)
 
-case class RawEvolution(name : String, probability : Float, evo : Array[RawEvoOperator])
+case class RawEvolution(name : String, evo : List[RawEvoOperator], probability : Double)
 
 abstract class RawEvoOperator
 case class RawAdd(add : RawProposition) extends RawEvoOperator

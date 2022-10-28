@@ -10,13 +10,13 @@ import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class MTLParserSuite extends AnyFunSuite {
-  test("parsing universal quantifier and conjunction foreach ?color, human(x,y) and tshirt(?color)") {
+  test("parsing universal quantifier and conjunction foreach ?color in Color, human(x,y) and tshirt(?color)") {
     val parser = new MTLFormulaParser
     val b = new MTLBuilder
-    val result : parser.ParseResult[LogicFormula with MTLNature] = parser.parseAll(parser.mtl_formula,"foreach ?color, human(x,y) and tshirt(?color)")
+    val result : parser.ParseResult[LogicFormula with MTLNature] = parser.parseAll(parser.mtl_formula,"foreach ?color in Color, human(x,y) and tshirt(?color)")
     assert(result.successful)
     val f : LogicFormula with MTLNature = result.get
-    assert(f==b.foreach(VariableTerm("color"),b.and(
+    assert(f==b.foreach("color","Color",b.and(
       b.predicate("human",List(AtomTerm("x"),AtomTerm("y"))),
       b.predicate("tshirt",List(VariableTerm("color"))))))
   }
@@ -33,19 +33,19 @@ class MTLParserSuite extends AnyFunSuite {
   test("parsing existential finally exists ?x, G[0,15] human(?x,y)") {
     val parser = new MTLFormulaParser
     val b = new MTLBuilder
-    val result : parser.ParseResult[LogicFormula with MTLNature] = parser.parseAll(parser.mtl_formula,"exists ?x, G[0,15] human(?x,y)")
+    val result : parser.ParseResult[LogicFormula with MTLNature] = parser.parseAll(parser.mtl_formula,"exists ?x in Name, G[0,15] human(?x,y)")
     assert(result.successful)
     val f : LogicFormula with MTLNature = result.get
-    assert(f==b.exists(VariableTerm("x"),b.globally(b.predicate("human",List(VariableTerm("x"),AtomTerm("y"))),MetricInterval(0,15))))
+    assert(f==b.exists("x","Name",b.globally(b.predicate("human",List(VariableTerm("x"),AtomTerm("y"))),MetricInterval(0,15))))
   }
 
   test("parsing finally universal conjunction F[1,2] (foreach ?color, human(x,y) and tshirt(?color))") {
     val parser = new MTLFormulaParser
     val b = new MTLBuilder
-    val result : parser.ParseResult[LogicFormula with MTLNature] = parser.parseAll(parser.mtl_formula,"F[1,2] (foreach ?color, human(x,y) and tshirt(?color))")
+    val result : parser.ParseResult[LogicFormula with MTLNature] = parser.parseAll(parser.mtl_formula,"F[1,2] (foreach ?color in Color, human(x,y) and tshirt(?color))")
     assert(result.successful)
     val f : LogicFormula with MTLNature = result.get
-    assert(f==b.finally_(b.foreach(VariableTerm("color"),b.and(
+    assert(f==b.finally_(b.foreach("color","Color",b.and(
       b.predicate("human",List(AtomTerm("x"),AtomTerm("y"))),
       b.predicate("tshirt",List(VariableTerm("color"))))),MetricInterval(1,2)))
   }
