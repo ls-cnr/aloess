@@ -1,6 +1,6 @@
 package org.icar.subsymbolic_test
 
-import org.icar.subsymbolic.builder.SubSymbolicBuilder
+import org.icar.subsymbolic.builder.SubLogicBuilder
 import org.icar.subsymbolic._
 import org.icar.symbolic.parser.DomainOntologyParser
 import org.junit.runner.RunWith
@@ -19,7 +19,7 @@ class SubSymLTLSuite extends AnyFunSuite {
     "define location(enum[sensor_id],enum[rooms])" +
 
     "}")
-  val builder = new SubSymbolicBuilder(onto_parser.get)
+  val builder = new SubLogicBuilder(onto_parser.get)
 
   test("subsymbolic ltl finally formula supervisor") {
     val form = RawFinally(RawProposition(0))

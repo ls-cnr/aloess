@@ -5,7 +5,7 @@ import org.icar.symbolic._
 
 import scala.collection.mutable.ArrayBuffer
 
-class SubSymbolicBuilder(val onto : DomainOntology) {
+class SubLogicBuilder(val onto : DomainOntology) {
   var direct : Map[Proposition,Int] = Map.empty
   var inverse : ArrayBuffer[Proposition] = ArrayBuffer()
   private var var_counter : Int = 0
@@ -50,34 +50,38 @@ class SubSymbolicBuilder(val onto : DomainOntology) {
     var_counter += 1
   }
 
-  def formula(f : LogicFormula, sets : Map[String,ObjectCategory]) : RawLogicFormula = {
+  def formula(f : LogicFormula) : RawLogicFormula = {
     f match {
       case p:Proposition => RawProposition(direct(p))
       case p:Predicate => formula_predicate(p)
 
       case True() => RawTT()
       case False() => RawFF()
-      case Negation(sf) => RawNeg(formula(sf,sets))
+      case Negation(sf) => RawNeg(formula(sf))
       case Conjunction(terms) =>
         val normal = Conjunction(terms).normal_form_two_terms
-        RawConj(formula(normal.formulas.head,sets),formula(normal.formulas.tail.head,sets))
+        RawConj(formula(normal.formulas.head),formula(normal.formulas.tail.head))
       case Disjunction(terms) =>
         val normal = Disjunction(terms).normal_form_two_terms
-        RawDisj(formula(normal.formulas.head,sets),formula(normal.formulas.tail.head,sets))
-      case Implication(left,right) =>
-        RawImpl(formula(left,sets),formula(right,sets))
-      case BiImplication(left,right) =>
-        RawIff(formula(left,sets),formula(right,sets))
+        RawDisj(formula(normal.formulas.head),formula(normal.formulas.tail.head))
+      case Implication(left,right) => RawImpl(formula(left),formula(right))
+      case BiImplication(left,right) => RawIff(formula(left),formula(right))
 
-      case ExistQuantifier(variable,form) =>
-        val cat = sets(variable.var_name)
-        val normal = ExistQuantifier(variable,form).apply_category(cat)
-        formula(normal,sets)
+      case ExistQuantifier(variable_def,form) =>
+        val cat = onto.get_category_by_name(variable_def.var_domain)
+        val normal = ExistQuantifier(variable_def,form).apply_category(cat)
+        formula(normal)
 
-      case UnivQuantifier(variable,form) =>
-        val cat = sets(variable.var_name)
-        val normal = UnivQuantifier(variable,form).apply_category(cat)
-        formula(normal,sets)
+      case UnivQuantifier(variable_def,form) =>
+        val cat = onto.get_category_by_name(variable_def.var_domain)
+        val normal = UnivQuantifier(variable_def,form).apply_category(cat)
+        formula(normal)
+
+      case Globally(op) => RawGlobally(formula(op))
+      case Finally(op) => RawFinally(formula(op))
+      case Next(op) => RawNext(formula(op))
+      case Until(l,r) => RawUntil(formula(l),formula(r))
+      case Release(l,r) => RawRelease(formula(l),formula(r))
 
       case _ =>
         throw new UnsupportedRawConversion(f)
