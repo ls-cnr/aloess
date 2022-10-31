@@ -1,16 +1,14 @@
 package org.icar.subsymbolic
 
-import org.icar.symbolic.Proposition
-
-case class RawState(bit_descr:Array[Boolean]) {
+case class RawState(satisfies:Array[Boolean]) {
   def touch(prop: Int, value : Boolean) : RawState = {
-    val updated_bit = bit_descr.clone()
+    val updated_bit = satisfies.clone()
     updated_bit(prop) = value
     RawState(updated_bit)
   }
 
   lazy val compact_description = calculate_compact_description
-  lazy val hash : Int = bit_descr.toSeq.hashCode()
+  lazy val hash : Int = satisfies.toSeq.hashCode()
 
   override def toString: String = compact_description
   override def hashCode() : Int = hash
@@ -24,8 +22,8 @@ case class RawState(bit_descr:Array[Boolean]) {
   private def calculate_compact_description : String = {
     var first = true
     var s ="["
-    for (i<-0 until bit_descr.length)
-      if (bit_descr(i)) {
+    for (i<-0 until satisfies.length)
+      if (satisfies(i)) {
         if (first)
           first = false
         else

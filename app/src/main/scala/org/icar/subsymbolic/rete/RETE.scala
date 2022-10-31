@@ -1,8 +1,6 @@
 package org.icar.subsymbolic.rete
 
 import org.icar.subsymbolic.{RawProposition, RawState}
-import org.icar.subsymbolic.builder.{RETEBuilder, SubLogicBuilder}
-import org.icar.symbolic.parser.DomainOntologyParser
 
 class RETE {
   /* static part */
@@ -10,15 +8,25 @@ class RETE {
   var betas : List[BetaNode] = List.empty
   var prods : List[ProductionNode] = List.empty
 
+  def reset_memory(wi: RawState):Memory = {
+    var zero_memory = Memory(wi,Map.empty,Map.empty,Map.empty)
+    for (a<-alphas)
+      if (!a.inverse && wi.satisfies(a.activation))
+        zero_memory = a.check_activation(zero_memory)
+      else if (a.inverse && !wi.satisfies(a.activation))
+        zero_memory = a.check_activation(zero_memory)
+    zero_memory
+  }
+
   def add_fact(memory:Memory, prop : RawProposition) : Memory = {
-    if (!memory.stable_state.bit_descr(prop.index)) {
+    if (!memory.stable_state.satisfies(prop.index)) {
       val result = memory.touch(prop, true)
       check_all_alpha(result)
     } else
       memory
   }
   def rmv_fact(memory:Memory, prop : RawProposition) : Memory = {
-    if (memory.stable_state.bit_descr(prop.index)) {
+    if (memory.stable_state.satisfies(prop.index)) {
       val result = memory.touch(prop, false)
       check_all_alpha(result)
     } else
@@ -87,37 +95,74 @@ class RETE {
 
 }
 
-object RunRete extends App {
-  val domain_parser = new DomainOntologyParser
 
-  val onto_parser = domain_parser.parseAll(domain_parser.domain,"domain \"prova5\" {  " +
-    "category users atom [ luca,john,claudia ] " +
-    "category rooms string [ \"livingroom\",\"kitchen\",\"bedroom\" ]  " +
-    "category sensor_id number [ 1,2,3 ]  " +
-
-    "define input(enum[users])" +
-    "define output(enum[users])" +
-    "define room(enum[rooms])" +
-
-    "rule input(?a), output(?b) => room(\"kitchen\")" +
-
-    "}")
-
-  val onto = onto_parser.get
-  val logic_builder = new SubLogicBuilder(onto)
-  val rete_builder = new RETEBuilder(logic_builder,onto.axioms)
-
-  val myrete = rete_builder.rete
-  println(myrete.stringGraphviz)
-  val wi = RawState(Array(false,false,false,false,false,false,false,false,false))
-  val start_memory = Memory(wi,Map.empty,Map.empty,Map.empty)
-  println(start_memory)
-  val updated_memory1 = myrete.add_fact(start_memory,RawProposition(0))
-  println(updated_memory1)
-  val updated_memory2 = myrete.add_fact(updated_memory1,RawProposition(4))
-  println(updated_memory2)
-  val updated_memory3 = myrete.rmv_fact(updated_memory2,RawProposition(4))
-  println(updated_memory3)
-
-
-}
+//
+//object RunRete extends App {
+//  val domain_parser = new DomainOntologyParser
+//
+//  val onto_parser = domain_parser.parseAll(domain_parser.domain,"domain \"prova5\" {  " +
+//    "category users atom [ luca,john,claudia ] " +
+//    "category rooms string [ \"livingroom\",\"kitchen\",\"bedroom\" ]  " +
+//    "category sensor_id number [ 1,2,3 ]  " +
+//
+//    "define input(enum[users])" +
+//    "define output(enum[users])" +
+//    "define room(enum[rooms])" +
+//
+//    "rule input(?a), output(?b) => room(\"kitchen\")" +
+//
+//    "}")
+//
+//  val onto = onto_parser.get
+//  val logic_builder = new SubLogicBuilder(onto)
+//  val rete_builder = new RETEBuilder(logic_builder,onto.axioms)
+//
+//  val myrete = rete_builder.rete
+//  println(myrete.stringGraphviz)
+//  val wi = RawState(Array(false,false,false,false,false,false,false,false,false))
+//  val start_memory = Memory(wi,Map.empty,Map.empty,Map.empty)
+//  println(start_memory)
+//  val updated_memory1 = myrete.add_fact(start_memory,RawProposition(0))
+//  println(updated_memory1)
+//  val updated_memory2 = myrete.add_fact(updated_memory1,RawProposition(4))
+//  println(updated_memory2)
+//  val updated_memory3 = myrete.rmv_fact(updated_memory2,RawProposition(4))
+//  println(updated_memory3)
+//
+//
+//}
+//
+//object RunRete2 extends App {
+//  val domain_parser = new DomainOntologyParser
+//
+//  val onto_parser = domain_parser.parseAll(domain_parser.domain,"domain \"prova5\" {  " +
+//    "category users atom [ luca,john,claudia ] " +
+//    "category rooms string [ \"livingroom\",\"kitchen\",\"bedroom\" ]  " +
+//    "category sensor_id number [ 1,2,3 ]  " +
+//
+//    "define input(enum[users])" +
+//    "define output(enum[users])" +
+//    "define room(enum[rooms])" +
+//
+//    "rule input(?a), not output(?b) => room(\"kitchen\")" +
+//
+//    "}")
+//
+//  val onto = onto_parser.get
+//  val logic_builder = new SubLogicBuilder(onto)
+//  val rete_builder = new RETEBuilder(logic_builder,onto.axioms)
+//
+//  val myrete = rete_builder.rete
+//  println(myrete.stringGraphviz)
+//  val wi = RawState(Array(false,false,false,false,false,false,false,false,false))
+//  val start_memory = myrete.reset_memory(wi)
+//  println(start_memory)
+//  val updated_memory1 = myrete.add_fact(start_memory,RawProposition(0))
+//  println(updated_memory1)
+//  val updated_memory2 = myrete.add_fact(updated_memory1,RawProposition(4))
+//  println(updated_memory2)
+//  val updated_memory3 = myrete.rmv_fact(updated_memory2,RawProposition(4))
+//  println(updated_memory3)
+//
+//
+//}

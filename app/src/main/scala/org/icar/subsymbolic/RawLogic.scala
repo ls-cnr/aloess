@@ -6,7 +6,7 @@ abstract class RawLogicFormula {
 }
 
 case class RawProposition(index:Int) extends RawLogicFormula {
-  override def satisfied_in(current: RawState): Boolean = current.bit_descr(index)
+  override def satisfied_in(current: RawState): Boolean = current.satisfies(index)
 
   override def next(state_now : RawState): RawFuture = {
     if (satisfied_in(state_now))

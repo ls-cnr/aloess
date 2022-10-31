@@ -16,11 +16,11 @@ class AlphaNode(val myrete:RETE,val aid:Int,val activation:Int,val inverse:Boole
     if (!inverse) {
       val alpha_memory = memory.alpha_tokens.getOrElse(aid,AlphaToken(false))
       // la condition (prima falsa) ora diventa vera
-      if ( alpha_memory.token==false && memory.stable_state.bit_descr(activation) ) {
+      if ( alpha_memory.token==false && memory.stable_state.satisfies(activation) ) {
         // aggiunta del token
         updated_memory =add_token(memory,this)
       // la condition (prima vera) ora diventa falsa
-      } else if ( alpha_memory.token==true && !memory.stable_state.bit_descr(activation) ) {
+      } else if ( alpha_memory.token==true && !memory.stable_state.satisfies(activation) ) {
         // rimozione del token
         updated_memory =rmv_token(memory,this)
       }
@@ -29,11 +29,11 @@ class AlphaNode(val myrete:RETE,val aid:Int,val activation:Int,val inverse:Boole
       val alpha_memory = memory.alpha_tokens.getOrElse(aid,AlphaToken(true))
 
       // la condition (prima vera) ora diventa falsa
-      if ( alpha_memory.token==true && !memory.stable_state.bit_descr(activation) ) {
+      if ( alpha_memory.token==true && !memory.stable_state.satisfies(activation) ) {
         // aggiunta del token
         updated_memory =add_token(memory,this)
         // la condition (prima falsa) ora diventa vera
-      } else if ( alpha_memory.token==false && memory.stable_state.bit_descr(activation) ) {
+      } else if ( alpha_memory.token==false && memory.stable_state.satisfies(activation) ) {
         // rimozione del token
         updated_memory =rmv_token(memory,this)
       }
