@@ -92,6 +92,22 @@ class DomainOntologyParserSuite extends AnyFunSuite {
       )))
     assert(result.get == b.build("prova7"))
   }
+
+  test("parsing ontology with negative axiom") {
+    val p = new DomainOntologyParser
+    val b = new DomainOntologyBuilder("none")
+
+    val result = p.parseAll(p.domain,"domain \"prova7\" {  rule p1(?a),not p2(?b),?a!=?b => p12(?a,?b)  }")
+    assert(result.successful)
+    b.axiom(
+      Predicate("p12",List(VariableTerm("a"),VariableTerm("b"))),
+      RuleAntecedent(List(
+        PredicateCondition(Predicate("p1",List(VariableTerm("a")))),
+        NegateCondition(Predicate("p2",List(VariableTerm("b")))),
+        Diversity(VariableTerm("a"),VariableTerm("b"))
+      )))
+    assert(result.get == b.build("prova7"))
+  }
 }
 
 

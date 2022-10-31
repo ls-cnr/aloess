@@ -45,10 +45,10 @@ class DomainOntologyParser extends JavaTokenParsers with FOLFormulaParserTrait {
   }
 
   def rule_condition : Parser[RuleCondition] =
+    "not"~fol_predicate ^^ {
+      case _~pred => NegateCondition(pred.asInstanceOf[Predicate])
+    } |
     fol_predicate ^^ { x => PredicateCondition(x.asInstanceOf[Predicate]) } |
-      "not"~fol_predicate ^^ {
-        case _~pred => NegateCondition(pred.asInstanceOf[Predicate])
-      } |
       expression
 
   def expression : Parser[RuleCondition] =

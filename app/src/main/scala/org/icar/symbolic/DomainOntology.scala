@@ -7,10 +7,18 @@ case class DomainOntology(name:String, signatures : List[PredicateSignature], ca
     if (selected.size > 1) throw new RedundantCategory()
     selected.head
   }
+  def get_signature_by_functor(func_name : String) : PredicateSignature = {
+    val selected = signatures.filter( x => x.functor_name == func_name )
+    if (selected.isEmpty) throw new InvalidSignature()
+    if (selected.size > 1) throw new RedundantSignature()
+    selected.head
+  }
 }
 
 class InvalidCategory extends Exception
 class RedundantCategory extends Exception
+class InvalidSignature extends Exception
+class RedundantSignature extends Exception
 
 
 
