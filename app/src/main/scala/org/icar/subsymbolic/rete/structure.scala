@@ -94,18 +94,31 @@ class ProductionNode(val myrete:RETE,val pid:Int,val production:Int) extends Ret
   def node_label : String = s"p($id)=$production"
 
   override def add_token(memory: Memory, from:ReteNode): Memory = {
-    val updated_memory = memory.touch(RawProposition(production),true).set_prod_token(pid,true)
-    if (memory != updated_memory)
+    val updated_memory = memory.touch(RawProposition(production),true).set_prod_token(pid,from.id,true)
+    val previous_tokens = count_tokens(memory)
+    val current_tokens = count_tokens(updated_memory)
+    if ( previous_tokens==0 && current_tokens>0 )
       myrete.add_fact(updated_memory,RawProposition(production))
     else
       updated_memory
   }
   override def rmv_token(memory:Memory, from:ReteNode):Memory = {
-    val updated_memory = memory.touch(RawProposition(production),false).set_prod_token(pid,false)
-    if (memory != updated_memory)
-      myrete.rmv_fact(updated_memory,RawProposition(production))
-    else
+    val updated_memory = memory.set_prod_token(pid,from.id,false)
+    val previous_tokens = count_tokens(memory)
+    val current_tokens = count_tokens(updated_memory)
+    if (previous_tokens>0 && current_tokens==0) {
+      val memory_with_retract = memory.touch(RawProposition(production),false)
+      myrete.rmv_fact(memory_with_retract, RawProposition(production))
+    }else
       updated_memory
+  }
+
+  def count_tokens(memory: Memory) : Int = {
+    if (memory.prod_tokens.isEmpty)
+      0
+    else {
+      memory.prod_tokens(pid).tokens.filter(x => x._2==true).size
+    }
   }
 }
 

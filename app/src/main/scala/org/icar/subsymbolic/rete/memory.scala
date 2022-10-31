@@ -44,14 +44,14 @@ case class Memory(
     }
   }
 
-  def set_prod_token(pid: Int,value:Boolean) : Memory = {
+  def set_prod_token(pid: Int, bid:Int, value:Boolean) : Memory = {
     if (prod_tokens.contains(pid)) {
-//      val prod_memory = prod(pid)
-      val updated_prod_memory = ProdToken(value)
+      val token_map = prod_tokens(pid).tokens
+      val updated_prod_memory = ProdToken(token_map + (bid->value))
       val updated_prod = prod_tokens - pid + (pid -> updated_prod_memory)
       Memory(stable_state,alpha_tokens,beta_tokens,updated_prod)
     } else {
-      val updated_prod_memory = ProdToken(value)
+      val updated_prod_memory = ProdToken(Map(bid->value))
       val updated_prod = prod_tokens + (pid -> updated_prod_memory)
       Memory(stable_state,alpha_tokens,beta_tokens,updated_prod)
     }
@@ -61,5 +61,5 @@ case class Memory(
 
 case class AlphaToken(token : Boolean)
 case class BetaToken(left : Boolean, right:Boolean)
-case class ProdToken(token : Boolean)
+case class ProdToken(tokens : Map[Int,Boolean])
 
