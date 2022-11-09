@@ -1,8 +1,6 @@
 package org.icar.solver.best_first
 
-import org.icar.solver.{FullSatisfaction, GoalModelMap}
-import org.icar.subsymbolic.RawLogicFormula
-import org.icar.subsymbolic.rete.Memory
+import org.icar.solver.{DomainMetric, FullSatisfaction, GoalMapMerger, GoalModelMap, GoalState, PartialSatisfaction, Violation}
 import org.icar.symbolic.GoalNode
 
 import scala.collection.immutable.TreeSet
@@ -37,8 +35,8 @@ case class WTSGraph(
   }
 
   def is_full_solution : Boolean = {
-    val root = graph_label.root_goal
-    graph_label.wts_goals.map(root.id).satisf == FullSatisfaction()
+    val root_goal_name = graph_label.wts_goals.root
+    graph_label.wts_goals.map(root_goal_name).satisf == FullSatisfaction()
   }
   def most_promising_node : Option[WTSNode] = {
     if (frontier.nonEmpty)
@@ -53,16 +51,66 @@ case class WTSGraph(
     not_complete && node_in_frontier
   }
 
+
+  /**
+   * apply all the expansions to the same wts thus to generate its updated version
+   * each expansion adds
+   * 1) a new frontier node
+   * 2) a new transition from the focus node to the new node
+   * 3) labels for node and trransition
+   * note: the whole graph labeling is changed consequently to
+   * 1) update the frontier data structure
+   * 2) check if the wts represents a full solution
+   */
+  def expand_wts(focusnode:WTSNode, exp_list: List[DecodeExpansion], goal_map_merger : GoalMapMerger, metric : DomainMetric) : WTSGraph = {
+    var nodes : List[WTSNode] = this.nodes
+    var transitions : List[WTSTransition] = this.transitions
+    var node_labels : Map[Int,NodeLabelling] = this.node_label
+    var tx_labels : Map[Int,TxLabelling] = this.tx_label
+    var frontier : TreeSet[WTSNode] = this.frontier
+    var visited : List[WTSNode] = this.visited
+
+    var wts_goal_map : Map[String,GoalState] = this.graph_label.wts_goals.map
+
+    for (exp <- exp_list) {
+      nodes = exp.node :: nodes
+      transitions = exp.tx :: transitions
+      node_labels = node_labels + (exp.node.id -> exp.nodelabel)
+      val node_goal_state = exp.nodelabel.node_goals.map
+
+      wts_goal_map = goal_map_merger.merge_maps(wts_goal_map,node_goal_state)
+
+      tx_labels = tx_labels + (exp.tx.id -> exp.txlabel)
+      frontier = frontier - focusnode + exp.node
+      visited = focusnode :: visited
+    }
+
+    val quality_sol: Double = calculate_quality_of_solution(wts_goal_map,metric)
+    val graph_label = GraphLabelling(GoalModelMap( this.graph_label.wts_goals.root ,wts_goal_map),quality_sol)
+    WTSGraph(start,nodes,transitions,graph_label,node_labels,tx_labels,frontier,visited)
+  }
+
+  def calculate_quality_of_solution(goal_map: Map[String, GoalState], metric : DomainMetric): Double = {
+    val root_state = goal_map(this.graph_label.wts_goals.root)
+    root_state.satisf match {
+      case FullSatisfaction() => metric.max
+      case PartialSatisfaction(degree) => degree
+      case Violation() => metric.min
+      case _ => metric.min
+    }
+  }
+
 }
 
 object WTSGraph {
-  def start_graph(start_node:WTSNode, root_goal : GoalNode, init_goal_map : GoalModelMap) : WTSGraph = {
-    val label = NodeLabelling(init_goal_map, true, List.empty)
+
+  def start_graph(start_node:WTSNode, init_goal_map : GoalModelMap) : WTSGraph = {
+    val label = NodeLabelling(init_goal_map, List.empty)
     WTSGraph(
       start_node,
       List(start_node),
       List.empty,
-      GraphLabelling(root_goal,init_goal_map,0),
+      GraphLabelling(init_goal_map,0),
       Map(0->label),
       Map.empty,
       TreeSet(start_node),List.empty
@@ -70,52 +118,3 @@ object WTSGraph {
   }
 }
 
-
-case class WTSNode(id:Int, memory:Memory, score:Double) extends Ordered[WTSNode] {
-  //score is the quality of the node (higher is better)
-  override def compare(that: WTSNode): Int = that.score compare this.score
-
-//  override def equals(obj: Any): Boolean = {
-//    obj match {
-//      case WTSNode(node_id,_,_) => if (id ==node_id) true else false
-//      case _ => false
-//    }
-//  }
-}
-
-case class WTSTransition(id:Int, origin : Int, destination : Int)
-
-
-
-case class GraphLabelling(
-                         root_goal : GoalNode,
-                         wts_goals : GoalModelMap,
-                         //full_solution : Boolean,
-                         quality_of_solution : Double     // global quality of the (partial) solution
-                       )
-case class NodeLabelling(
-                          node_goals : GoalModelMap,
-                          is_frontier : Boolean, // the node is yet to be expanded
-                          //                          is_terminal: Boolean, // a node is terminal it has been focused but it has not outgoing arcs
-                          invariants : List[RawLogicFormula], // conditions that must hold in any new node
-                        )
-case class TxLabelling(action_id: Int,scenario_id : String)
-
-
-
-
-
-
-
-object runTreeSetOnNode extends App {
-  var frontier : TreeSet[WTSNode] =TreeSet.empty
-  val node1 = WTSNode(1,null,10)
-  val node2 = WTSNode(2,null,5)
-  val node3 = WTSNode(3,null,25)
-  val node4 = WTSNode(4,null,15)
-  frontier = frontier+node1
-  frontier = frontier+node2
-  frontier = frontier+node3
-  frontier = frontier+node4
-  println(frontier)
-}

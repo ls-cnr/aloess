@@ -12,8 +12,8 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
   val node_builder = new GlobalNodeBuilder(metric)
   val goal_map_merger = new GoalMapMerger(goal_model.root)
 
-  def num_complete_solutions: Int = 0
   def get_full_solutions: List[AbstractWorkflow] = List.empty
+  def num_complete_solutions: Int = solution_set.filter(x => x.is_full_solution).size
 
   override def run(start:StateOfWorld, termination:TerminationCondition) : SolverOutcome = {
     val start_timestamp: Long = System.currentTimeMillis
@@ -23,20 +23,23 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
 
     while (!termination.check_termination(start_timestamp,n_iteration,num_complete_solutions)) {
       iteration
-      println(s"/** iteration $n_iteration **/")
-      println(stringGraphviz)
+      println(stringIterationGraphviz(n_iteration))
       n_iteration += 1
     }
 
     val end_timestamp: Long = System.currentTimeMillis
     val elapsed = end_timestamp-start_timestamp
-    get_full_solutions
+    val full_solutions = get_full_solutions
 
-    SolverError("in-work",n_iteration,elapsed)
+    if (full_solutions.nonEmpty)
+      FullSolutions(full_solutions,n_iteration,elapsed)
+    else
+      SolverError("in-work",n_iteration,elapsed)
+
   }
 
-  def stringGraphviz: String = {
-    var string = ""
+  def stringIterationGraphviz(it:Int): String = {
+    var string = s"/** iteration $it **/ \n"
     for (wts <- solution_set) string += wts.stringGraphviz + "\n"+wts.graph_label.wts_goals.stringGraphviz(goal_model)+"\n"
     string
   }
@@ -51,7 +54,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     var goal_map = goal_state_builder.create_goalmodel_map
     goal_map = goal_state_builder.update_goalmap(start_node.memory.stable_state,goal_map)
 
-    List(WTSGraph.start_graph(start_node,goal_model.root,goal_map))
+    List(WTSGraph.start_graph(start_node,goal_map))
   }
 
   /**
@@ -138,7 +141,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       if (pre_exp_test) {
          val post_exp_test = check_invariants(wts,focusnode,wts_exp_list)
           if (post_exp_test) {
-          val updated_wts : WTSGraph = expand_wts(wts,focusnode,wts_exp_list)
+          val updated_wts : WTSGraph = wts.expand_wts(focusnode,wts_exp_list,goal_map_merger,metric)
           result = updated_wts :: result
         }
       }
@@ -168,14 +171,11 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
 
       val dest_node : WTSNode = node_builder.get_or_create_node(trajectory)
 
-      if (!wts.node_label.contains(focusnode.id)) {
-        println("error here")
-      }
       val updated_map = update_goal_map(wts,focusnode,dest_node)
 
       val invariants = exp.invariant :: wts.node_label(focusnode.id).invariants
 
-      val node_label = NodeLabelling(updated_map,true,invariants)
+      val node_label = NodeLabelling(updated_map,invariants)
       val tx = WTSTransition(tx_counter,focusnode.id,dest_node.id)
       val txlabel = TxLabelling(exp.id,effect.name)
       tx_counter += 1
@@ -196,43 +196,6 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     goal_state_builder.update_goalmap(dest_node.memory.stable_state,focusmap)
   }
 
-  /**
-   * apply all the expansions to the same wts thus to generate its updated version
-   * each expansion adds
-   * 1) a new frontier node
-   * 2) a new transition from the focus node to the new node
-   * 3) labels for node and trransition
-   * note: the whole graph labeling is changed consequently to
-   * 1) update the frontier data structure
-   * 2) check if the wts represents a full solution
-   */
-  private def expand_wts(wts: WTSGraph, focusnode:WTSNode, exp_list: List[DecodeExpansion]) : WTSGraph = {
-    var nodes : List[WTSNode] = wts.nodes
-    var transitions : List[WTSTransition] = wts.transitions
-    var node_labels : Map[Int,NodeLabelling] = wts.node_label
-    var tx_labels : Map[Int,TxLabelling] = wts.tx_label
-    var frontier : TreeSet[WTSNode] = wts.frontier
-    var visited : List[WTSNode] = wts.visited
-
-    var wts_goal_map : Map[String,GoalState] = wts.graph_label.wts_goals.map
-
-    for (exp <- exp_list) {
-      nodes = exp.node :: nodes
-      transitions = exp.tx :: transitions
-      node_labels = node_labels + (exp.node.id -> exp.nodelabel)
-      val node_goal_state = exp.nodelabel.node_goals.map
-
-      wts_goal_map = goal_map_merger.merge_maps(wts_goal_map,node_goal_state)
-
-      tx_labels = tx_labels + (exp.tx.id -> exp.txlabel)
-      frontier = frontier - focusnode + exp.node
-      visited = focusnode :: visited
-    }
-
-    val quality_sol: Double = calculate_quality_of_solution(wts_goal_map)
-    val graph_label = GraphLabelling(wts.graph_label.root_goal,GoalModelMap(goal_model.root.id,wts_goal_map),quality_sol)
-    WTSGraph(wts.start,nodes,transitions,graph_label,node_labels,tx_labels,frontier,visited)
-  }
 
   /** this test passes if all the new nodes respects all the invariants of the previous node */
   private def check_invariants(wts: WTSGraph, focusnode:WTSNode, exp_list: List[DecodeExpansion]) : Boolean = {
@@ -259,17 +222,8 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     no_goal_violation
   }
 
-  def calculate_quality_of_solution(goal_map: Map[String, GoalState]): Double = {
-    val root_state = goal_map(goal_model.root.id)
-    root_state.satisf match {
-      case FullSatisfaction() => metric.max
-      case PartialSatisfaction(degree) => degree
-      case Violation() => metric.min
-      case _ => metric.min
-    }
-  }
 
 
-  case class DecodeExpansion(node:WTSNode, nodelabel:NodeLabelling, tx:WTSTransition, txlabel:TxLabelling)
 }
 
+case class DecodeExpansion(node:WTSNode, nodelabel:NodeLabelling, tx:WTSTransition, txlabel:TxLabelling)
