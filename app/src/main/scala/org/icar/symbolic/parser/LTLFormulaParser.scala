@@ -18,8 +18,8 @@ trait LTLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
   def ltl_until_formula : Parser[LogicFormula with LTLNature] = ltl_release_formula~"U"~ltl_not_formula ^^ {case form1~_~form2 => b.until(form1,form2)} | ltl_release_formula ^^ { x=>x}
   def ltl_release_formula : Parser[LogicFormula with LTLNature] = ltl_and_formula~"R"~ltl_not_formula ^^ {case form1~_~form2 => b.release(form1,form2)} | ltl_and_formula ^^ { x=>x}
 
-  def ltl_and_formula : Parser[LogicFormula with LTLNature] = ltl_or_formula~"and"~ltl_not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | ltl_or_formula ^^ { x=>x}
-  def ltl_or_formula : Parser[LogicFormula with LTLNature] = ltl_impl_formula~"or"~ltl_not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | ltl_impl_formula ^^ { x=>x}
+  def ltl_and_formula : Parser[LogicFormula with LTLNature] = ltl_or_formula~"and"~ltl_and_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | ltl_or_formula ^^ { x=>x}
+  def ltl_or_formula : Parser[LogicFormula with LTLNature] = ltl_impl_formula~"or"~ltl_or_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | ltl_impl_formula ^^ { x=>x}
   def ltl_impl_formula : Parser[LogicFormula with LTLNature] = ltl_biiml_formula~"->"~ltl_not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | ltl_biiml_formula ^^ { x=>x}
   def ltl_biiml_formula : Parser[LogicFormula with LTLNature] = ltl_not_formula~"<->"~ltl_not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | ltl_not_formula ^^ { x=>x}
 

@@ -15,8 +15,8 @@ trait FOLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
   def fol_exist_formula : Parser[LogicFormula with FOLNature] = "exists"~variable_def~","~fol_formula ^^ {case _~v~_~form => b.exists(v.var_name,v.var_domain,form)}
   def fol_foreach_formula : Parser[LogicFormula with FOLNature] = "foreach"~variable_def~","~fol_formula ^^ {case _~v~_~form => b.foreach(v.var_name,v.var_domain,form)}
 
-  def fol_and_formula : Parser[LogicFormula with FOLNature] = fol_or_formula~"and"~fol_not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | fol_or_formula ^^ { x=>x}
-  def fol_or_formula : Parser[LogicFormula with FOLNature] = fol_impl_formula~"or"~fol_not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | fol_impl_formula ^^ { x=>x}
+  def fol_and_formula : Parser[LogicFormula with FOLNature] = fol_or_formula~"and"~fol_and_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | fol_or_formula ^^ { x=>x}
+  def fol_or_formula : Parser[LogicFormula with FOLNature] = fol_impl_formula~"or"~fol_or_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | fol_impl_formula ^^ { x=>x}
   def fol_impl_formula : Parser[LogicFormula with FOLNature] = fol_biiml_formula~"->"~fol_not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | fol_biiml_formula ^^ { x=>x}
   def fol_biiml_formula : Parser[LogicFormula with FOLNature] = fol_not_formula~"<->"~fol_not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | fol_not_formula ^^ { x=>x}
   def fol_not_formula : Parser[LogicFormula with FOLNature] = "not"~fol_left_formula ^^ {case _~form =>b.not(form) } | fol_left_formula

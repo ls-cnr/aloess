@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
 
+
 @RunWith(classOf[JUnitRunner])
 class MTLParserSuite extends AnyFunSuite {
   test("parsing universal quantifier and conjunction foreach ?color in Color, human(x,y) and tshirt(?color)") {
@@ -21,7 +22,7 @@ class MTLParserSuite extends AnyFunSuite {
       b.predicate("tshirt",List(VariableTerm("color"))))))
   }
 
-  test("parsing metric finally F[1,2] test(a,?b)") {
+  test("parsing metric finally F[1,2] ignore(a,?b)") {
     val parser = new MTLFormulaParser
     val b = new MTLBuilder
     val result : parser.ParseResult[LogicFormula with MTLNature] = parser.parseAll(parser.mtl_formula,"F[1,2] test(a,?b)")
@@ -95,3 +96,4 @@ class MTLParserSuite extends AnyFunSuite {
     assert(f==b.finally_(b.globally(b.predicate("a"),MetricInterval(0,111)),MetricInterval(0,111)))
   }
 }
+

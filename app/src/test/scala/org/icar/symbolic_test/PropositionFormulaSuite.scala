@@ -2,6 +2,7 @@ package org.icar.symbolic_test
 
 import org.icar.symbolic.builder.PropositionBuilder
 import org.icar.symbolic.{Conjunction, Disjunction, Proposition, True}
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner

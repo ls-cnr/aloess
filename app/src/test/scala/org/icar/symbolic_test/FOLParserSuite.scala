@@ -57,4 +57,13 @@ class FOLParserSuite extends AnyFunSuite {
       b.predicate("human",List(VariableTerm("y"))),
       b.predicate("tshirt",List(VariableTerm("y"),VariableTerm("color")))))))
   }
+
+  test("parsing conjunction with multiple and") {
+    val parser = new FOLFormulaParser
+    val b = new FOLBuilder
+    val result : parser.ParseResult[LogicFormula with FOLNature] = parser.parseAll(parser.fol_formula,"testA and testB and testC")
+    assert(result.successful)
+    val f : LogicFormula with FOLNature = result.get
+    assert(f==b.and(b.predicate("testA",List()),b.and(b.predicate("testB",List()),b.predicate("testC",List()))))
+  }
 }

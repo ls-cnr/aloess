@@ -75,4 +75,12 @@ class LTLParserSuite extends AnyFunSuite {
     val f : LogicFormula with LTLNature = result.get
     assert(f==b.finally_(b.or(b.predicate("test2"),b.predicate("test3"))))
   }
+
+  test("parsing finally with comma ") {
+    val parser = new LTLFormulaParser
+    val b = new LTLBuilder
+    val result : parser.ParseResult[LogicFormula with LTLNature] = parser.parseAll(parser.ltl_formula,"F (user_engagement(not_interested) or user_engagement(social) or user_engagement(open_mind) or user_engagement(passive))")
+    assert(result.successful)
+  }
 }
+// F (user_engagement(not_interested) or user_engagement(social) or user_engagement(open_mind) or user_engagement(passive))

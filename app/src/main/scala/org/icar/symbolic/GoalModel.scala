@@ -3,13 +3,17 @@ package org.icar.symbolic
 import java.time.{Duration, LocalDateTime}
 
 abstract class GoalModel
-case class GoalTree(root : GoalNode, meta:List[MetaGoal]) extends GoalModel
+case class GoalTree(root : GoalNode, meta:List[MetaGoal]) extends GoalModel {
+
+}
 case class FlatGoalList[GoalType](goals : List[GoalType]) extends GoalModel
 
 
-abstract class GoalNode(name : String)
+abstract class GoalNode(val id : String)
 case class AndGoalDecomposition(name : String,subgoals : List[GoalNode]) extends GoalNode(name)
 case class OrGoalDecomposition(name : String,subgoals : List[GoalNode]) extends GoalNode(name)
+
+//abstract class LeafNode(override val id : String) extends GoalNode(id)
 case class GoalSpec(name : String,trigger: LogicFormula with PropositionNature, formula:LogicFormula with PropositionNature) extends GoalNode(name)
 case class FOLGoalSpec(name : String,trigger: LogicFormula with FOLNature, formula:LogicFormula with FOLNature) extends GoalNode(name)
 case class LTLGoalSpec(name : String,trigger: LogicFormula with FOLNature, formula:LogicFormula with LTLNature) extends GoalNode(name)

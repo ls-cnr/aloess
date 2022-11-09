@@ -18,9 +18,9 @@ trait MTLFormulaParserTrait extends JavaTokenParsers with TermParserTrait  {
   def mtl_until_formula : Parser[LogicFormula with MTLNature] = mtl_release_formula~"U"~mtl_interval~mtl_not_formula ^^ {case form1~_~interv~form2 => b.until(form1,form2,interv)} | mtl_release_formula ^^ { x=>x}
   def mtl_release_formula : Parser[LogicFormula with MTLNature] = mtl_and_formula~"R"~mtl_interval~mtl_not_formula ^^ {case form1~_~interv~form2 => b.release(form1,form2,interv)} | mtl_and_formula ^^ { x=>x}
 
-  def mtl_and_formula : Parser[LogicFormula with MTLNature] = mtl_or_formula~"and"~mtl_not_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | mtl_or_formula ^^ { x=>x}
-  def mtl_or_formula : Parser[LogicFormula with MTLNature] = mtl_impl_formula~"or"~mtl_not_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | mtl_impl_formula ^^ { x=>x}
-  def mtl_impl_formula : Parser[LogicFormula with MTLNature] = mtl_biiml_formula~"->"~mtl_not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | mtl_biiml_formula ^^ { x=>x}
+  def mtl_and_formula : Parser[LogicFormula with MTLNature] = mtl_not_formula~"and"~mtl_and_formula ^^ {case form1~_~form2 => b.and(form1,form2)} | mtl_or_formula ^^ { x=>x}
+  def mtl_or_formula : Parser[LogicFormula with MTLNature] = mtl_not_formula~"or"~mtl_or_formula ^^ {case form1~_~form2 => b.or(form1,form2)} | mtl_impl_formula ^^ { x=>x}
+  def mtl_impl_formula : Parser[LogicFormula with MTLNature] = mtl_not_formula~"->"~mtl_not_formula ^^ {case form1~_~form2 => b.implies(form1,form2)} | mtl_biiml_formula ^^ { x=>x}
   def mtl_biiml_formula : Parser[LogicFormula with MTLNature] = mtl_not_formula~"<->"~mtl_not_formula ^^ {case form1~_~form2 => b.biimpl(form1,form2)} | mtl_not_formula ^^ { x=>x}
 
 

@@ -6,8 +6,9 @@ import java.time.{Duration, LocalDateTime}
 import scala.util.parsing.combinator.JavaTokenParsers
 
 class GoalTreeParser extends JavaTokenParsers with FOLFormulaParserTrait with LTLFormulaParserTrait with MTLFormulaParserTrait {
-  def goal_tree : Parser[GoalTree] = "model"~"{"~goal~meta~"}" ^^ {
-    case _~_~g~m~_ => GoalTree(g,m)
+  def goal_tree : Parser[GoalTree] = "model"~"{"~goal~opt(meta)~"}" ^^ {
+    case _~_~g~Some(m)~_ => GoalTree(g,m)
+    case _~_~g~None~_ => GoalTree(g,List.empty)
   }
 
   def goal : Parser[GoalNode] = and_decomposition | or_decomposition | leaf_goal
@@ -21,13 +22,13 @@ class GoalTreeParser extends JavaTokenParsers with FOLFormulaParserTrait with LT
 
   def leaf_goal : Parser[GoalNode] = fol_goal | ltl_goal | mtl_goal
 
-  def fol_goal : Parser[FOLGoalSpec] = "goal"~ident~"when"~fol_formula~"should"~"address"~fol_formula ^^ {
-    case _~name~_~trigger~_~_~fs => FOLGoalSpec(name,trigger,fs)
+  def fol_goal : Parser[LTLGoalSpec] = "goal"~ident~"when"~fol_formula~"should"~"address"~fol_formula ^^ {
+    case _~name~_~trigger~_~_~fs => LTLGoalSpec(name,trigger,Finally(fs))
   }
-  def ltl_goal : Parser[LTLGoalSpec] = "goal"~ident~"when"~fol_formula~"should"~"address"~ltl_formula ^^ {
+  def ltl_goal : Parser[LTLGoalSpec] = "goal"~ident~"when"~fol_formula~"should"~"ensure"~ltl_formula ^^ {
     case _~name~_~trigger~_~_~fs => LTLGoalSpec(name,trigger,fs)
   }
-  def mtl_goal : Parser[MTLGoalSpec] = "goal"~ident~"when"~fol_formula~"should"~"address"~mtl_formula ^^ {
+  def mtl_goal : Parser[MTLGoalSpec] = "goal"~ident~"when"~fol_formula~"should"~"grant"~mtl_formula ^^ {
     case _~name~_~trigger~_~_~fs => MTLGoalSpec(name,trigger,fs)
   }
 
