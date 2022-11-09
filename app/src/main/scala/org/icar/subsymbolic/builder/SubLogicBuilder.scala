@@ -97,6 +97,17 @@ class SubLogicBuilder(val onto : DomainOntology) {
       throw new PredicateMustBeGrounded(p)
   }
 
+  def state(w : StateOfWorld):RawState = {
+    val array : Array[Boolean] = Array.fill(var_counter){false}
+
+    for (s<-w.statements) {
+      val index = direct(s)
+      array(index)=true
+    }
+
+    RawState(array)
+  }
+
 
 }
 

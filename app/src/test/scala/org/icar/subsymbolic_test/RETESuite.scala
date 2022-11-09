@@ -134,11 +134,11 @@ class RETESuite extends AnyFunSuite {
     val wi = RawState(Array(false,false,false,false,false,true,false,false,false))
     val start_memory = myrete.reset_memory(wi)
 
-    println(start_memory)
+    //println(start_memory)
 
     val evo = RawEvolution("act",List(RawAdd(RawProposition(0)),RawAdd(RawProposition(4)),RawRem(RawProposition(5))),0)
     val updated_memory = myrete.evolution(start_memory,evo)
-    println(updated_memory)
+    //println(updated_memory)
     assert(updated_memory.stable_state.satisfies(0))
     assert(updated_memory.stable_state.satisfies(4))
     assert(!updated_memory.stable_state.satisfies(5))
