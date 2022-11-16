@@ -6,6 +6,10 @@ import org.icar.symbolic.{AndGoalDecomposition, GoalNode, GoalSpec, GoalTree, LT
 
 case class GoalModelMap(root:String, map : Map[String,GoalState]) {
 
+  def degree : Double = map(root).sat_degree
+
+  def get_root_state : GoalState = map(root)
+
   def stringGraphviz(goal_model : GoalTree) : String = {
     val body = stringGraphviz_generic_node(goal_model,goal_model.root)
     s"digraph GoalState {\n $body }\n"
@@ -23,11 +27,19 @@ case class GoalModelMap(root:String, map : Map[String,GoalState]) {
 
   def stringGraphviz_and_node(goal_model : GoalTree, name: String, subgoals: List[GoalNode]): String = {
     val goal_state = map(name)
-    val color = if (goal_state.satisf == FullSatisfaction()) "green" else "black"
+    var color = "black"
+    var label = s"\"$name\""
+    goal_state.sat_state match {
+      case FullSatisfaction() => color = "green"
+      case PartialSatisfaction() => color = "blue"; label = s"\"$name(${goal_state.sat_degree})\""
+      case Violation() => color = "red"
+      case _ =>
+    }
+
     var string = ""
     for (s <- subgoals) {
       string += stringGraphviz_generic_node(goal_model, s)
-      string += s"\"$name\"[color=$color];\n"
+      string += s"\"$name\"[color=$color,label=$label];\n"
       string += s"\"$name\"->\"${s.id}\";\n"
     }
   string
@@ -35,11 +47,18 @@ case class GoalModelMap(root:String, map : Map[String,GoalState]) {
 
   def stringGraphviz_or_node(goal_model : GoalTree, name: String, subgoals: List[GoalNode]): String = {
     val goal_state = map(name)
-    val color = if (goal_state.satisf == FullSatisfaction()) "green" else "black"
+    var color = "black"
+    var label = s"\"$name\""
+    goal_state.sat_state match {
+      case FullSatisfaction() => color = "green"
+      case PartialSatisfaction() => color = "blue"; label = s"\"$name(${goal_state.sat_degree})\""
+      case Violation() => color = "red"
+      case _ =>
+    }
     var string = ""
     for (s <- subgoals) {
       string += stringGraphviz_generic_node(goal_model, s)
-      string += s"\"$name\"[shape=diamond,color=$color];\n"
+      string += s"\"$name\"[shape=diamond,color=$color,label=$label];\n"
       string += s"\"$name\"->\"$s.id\";\n"
     }
     string
@@ -47,14 +66,21 @@ case class GoalModelMap(root:String, map : Map[String,GoalState]) {
 
   def stringGraphviz_leaf_node(goal_model : GoalTree, name: String): String = {
     val goal_state = map(name)
-    val color = if (goal_state.satisf == FullSatisfaction()) "green" else "black"
-    s"\"$name\"[color=$color];\n"
+    var color = "black"
+    var label = s"\"$name\""
+    goal_state.sat_state match {
+      case FullSatisfaction() => color = "green"
+      case PartialSatisfaction() => color = "blue"; label = s"\"$name(${goal_state.sat_degree})\""
+      case Violation() => color = "red"
+      case _ =>
+    }
+    s"\"$name\"[color=$color,label=$label];\n"
   }
 
 
 }
 
-case class GoalState(achievement: AchievementState, satisf : GoalSatisfaction, switch_to_committ:Boolean, switch_to_satisf:Boolean) {
+case class GoalState(internal_state: AchievementState, sat_state : GoalSatisfaction, sat_degree : Double, switch_to_committ:Boolean, switch_to_satisf:Boolean) {
 }
 
 
@@ -68,4 +94,4 @@ case class Completed() extends AchievementState
 abstract class GoalSatisfaction
 case class FullSatisfaction() extends GoalSatisfaction
 case class Violation() extends GoalSatisfaction
-case class PartialSatisfaction(degree:Double) extends GoalSatisfaction
+case class PartialSatisfaction() extends GoalSatisfaction //degree:Double

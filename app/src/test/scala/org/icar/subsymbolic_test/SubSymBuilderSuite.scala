@@ -112,6 +112,23 @@ class SubSymBuilderSuite extends AnyFunSuite {
     assert(raw == RawDisj(RawConj(RawProposition(2),RawProposition(1)),RawDisj(RawConj(RawProposition(5),RawProposition(4)),RawConj(RawProposition(8),RawProposition(7)))))
   }
 
+  test("redundant predicates") {
+    val p2 = new DomainOntologyParser
+    val onto_parser_2 = p2.parseAll(p2.domain,"domain \"prova5\" {  " +
+      "category ROOM atom [ bedroom, kitchen, living_room ] " +
+      "category ROOM_OR_UNKNOWN atom [ bedroom, kitchen, living_room, otherwise ] " +
+      "define user_location(enum[ROOM_OR_UNKNOWN])" +
+      "}")
+
+    val onto_2 = onto_parser_2.get
+    val builder = new SubLogicBuilder(onto_2)
+    val raw = builder.formula(
+      ExistQuantifier(VariableDef("x","ROOM"), Predicate("user_location",List(VariableTerm("x"))) ))
+    assert(raw == RawDisj(RawProposition(0),RawDisj(RawProposition(1),RawProposition(2))))
+
+
+  }
+
 }
 
 

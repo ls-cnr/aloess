@@ -1,0 +1,17 @@
+model {  
+    goal cognitive_stimulation is and [
+      goal engage_user when true should address (user_engagement(not_interested) or user_engagement(social) or user_engagement(open_mind) or user_engagement(passive))
+      goal perform_stimulation is and [
+        goal g2_1 when user_engagement(social) should address performed(social_activity)
+        goal g2_2 when user_engagement(open_mind) should address performed(cognitive_exercise)
+        goal g2_3 when user_engagement(passive) should address performed(entertainment)
+      ]
+      goal log_activity is and [
+        goal g3_1 when user_localization(otherwise) should address activity_registered(done)
+        goal g3_2 when user_engagement(not_interested) should address activity_registered(done)
+        goal g3_3 when performed(social_activity) should address activity_registered(done)
+        goal g3_4 when performed(cognitive_exercise) should address activity_registered(done)
+        goal g3_5 when performed(entertainment) should address activity_registered(done)
+      ]
+    ]
+}

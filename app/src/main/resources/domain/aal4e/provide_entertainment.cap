@@ -1,0 +1,6 @@
+capability "provide_entertainment" [
+    pre: user_location(living_room) and user_engagement(passive) and entertainment_content(selected)
+    post: performed(entertainment)
+    evolution "perf. entertain" : add performed(entertainment)
+]
+      

@@ -1,0 +1,6 @@
+capability "find user" [
+  pre: true
+  post: user_location(living_room) or user_localization(otherwise)
+  evolution "found" : add user_location(living_room)
+  evolution "not_found" : add user_localization(otherwise)
+]

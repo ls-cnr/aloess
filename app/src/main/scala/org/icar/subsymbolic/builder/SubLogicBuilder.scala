@@ -44,10 +44,12 @@ class SubLogicBuilder(val onto : DomainOntology) {
     val ground_args: List[ConstantTerm] = for (a <- f.arg_types) yield assigned(a)
     val p = Proposition(f.functor_name,ground_args)
 
-    direct += (p->var_counter)
-    inverse += p
+    if (!inverse.contains(p)) {
+      direct += (p -> var_counter)
+      inverse += p
 
-    var_counter += 1
+      var_counter += 1
+    }
   }
 
   def formula(f : LogicFormula) : RawLogicFormula = {

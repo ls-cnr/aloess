@@ -1,12 +1,10 @@
 package org.icar.solver
 
-import org.icar.subsymbolic
 import org.icar.subsymbolic.builder.SubLogicBuilder
 import org.icar.subsymbolic.{RawFuture, RawState, RawTT}
 import org.icar.symbolic._
 
 class GoalMapBuilder(builder : SubLogicBuilder, goal_model : GoalTree, d2s : DistanceToSatisfMetric) {
-
 
   def create_goalmodel_map : GoalModelMap = {
     var map : Map[String,GoalState] = Map.empty
@@ -18,22 +16,22 @@ class GoalMapBuilder(builder : SubLogicBuilder, goal_model : GoalTree, d2s : Dis
     node match {
       case x:LTLGoalSpec =>
         val form = builder.formula(x.trigger)
-        Map(x.name -> GoalState(Ready(form),PartialSatisfaction(0),false,false))
+        Map(x.name -> GoalState(Ready(form),PartialSatisfaction(),d2s.failure_value,false,false))
       case x:FOLGoalSpec =>
         val form = builder.formula(x.trigger)
-        Map(x.name -> GoalState(Ready(form),PartialSatisfaction(0),false,false))
+        Map(x.name -> GoalState(Ready(form),PartialSatisfaction(),d2s.failure_value,false,false))
       case x:GoalSpec =>
         val form = builder.formula(x.trigger)
-        Map(x.name -> GoalState(Ready(form),PartialSatisfaction(0),false,false))
+        Map(x.name -> GoalState(Ready(form),PartialSatisfaction(),d2s.failure_value,false,false))
       case x:OrGoalDecomposition =>
         var map : Map[String,GoalState] = Map.empty
         for (g <- x.subgoals) map = map ++ goal_entry(g)
-        map += (x.name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(0),false,false))
+        map += (x.name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(),d2s.failure_value,false,false))
         map
       case x:AndGoalDecomposition =>
         var map : Map[String,GoalState] = Map.empty
         for (g <- x.subgoals) map = map ++ goal_entry(g)
-        map += (x.name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(0),false,false))
+        map += (x.name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(),d2s.failure_value,false,false))
         map
     }
   }
@@ -56,10 +54,10 @@ class GoalMapBuilder(builder : SubLogicBuilder, goal_model : GoalTree, d2s : Dis
 
   private def update_map_and_node(name : String, subgoals : List[GoalNode], current: RawState, map: Map[String, GoalState]) : Map[String,GoalState] = {
     val goalstate = map(name)
-    goalstate.satisf match {
+    goalstate.sat_state match {
       case FullSatisfaction() => map
       case Violation() => map
-      case PartialSatisfaction(degree) =>
+      case PartialSatisfaction() =>
         var sub_map = map
 
         var fullsat=true
@@ -67,29 +65,29 @@ class GoalMapBuilder(builder : SubLogicBuilder, goal_model : GoalTree, d2s : Dis
         for (sg <- subgoals if !violat) {
           sub_map = update_map_generic_node(sg, current, sub_map)
           val state_sg = sub_map(sg.id)
-          state_sg.satisf match {
-            case PartialSatisfaction(degree) =>fullsat=false
+          state_sg.sat_state match {
+            case PartialSatisfaction() =>fullsat=false
             case Violation() =>violat=true
             case _ =>
           }
         }
         if (violat)
-          sub_map - name + (name -> GoalState(Completed(), Violation(),false,false))
+          sub_map - name + (name -> GoalState(Completed(), Violation(),d2s.failure_value,false,false))
         else if (fullsat)
-          sub_map - name + (name -> GoalState(Completed(), FullSatisfaction(),false,true))
+          sub_map - name + (name -> GoalState(Completed(), FullSatisfaction(),d2s.success_value,false,true))
         else {
           val new_degree = d2s.resistance_and_node(name,subgoals,map,current)
-          sub_map - name + (name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(new_degree),false,false))
+          sub_map - name + (name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(),new_degree,false,false))
         }
     }
   }
 
   private def update_map_or_node(name : String, subgoals : List[GoalNode], current: RawState, map: Map[String, GoalState]) : Map[String,GoalState] = {
     val goalstate = map(name)
-    goalstate.satisf match {
+    goalstate.sat_state match {
       case FullSatisfaction() => map
       case Violation() => map
-      case PartialSatisfaction(degree) =>
+      case PartialSatisfaction() =>
         var sub_map = map
 
         var fullsat=false
@@ -97,50 +95,50 @@ class GoalMapBuilder(builder : SubLogicBuilder, goal_model : GoalTree, d2s : Dis
         for (sg <- subgoals if !violat) {
           sub_map = update_map_generic_node(sg, current, sub_map)
           val state_sg = sub_map(sg.id)
-          state_sg.satisf match {
+          state_sg.sat_state match {
             case FullSatisfaction() =>fullsat=true
             case Violation() =>violat=true
             case _ =>
           }
         }
         if (violat)
-          sub_map - name + (name -> GoalState(Completed(), Violation(),false,false))
+          sub_map - name + (name -> GoalState(Completed(), Violation(),d2s.failure_value,false,false))
         else if (fullsat)
-          sub_map - name + (name -> GoalState(Completed(), FullSatisfaction(),false,true))
+          sub_map - name + (name -> GoalState(Completed(), FullSatisfaction(),d2s.success_value,false,true))
         else {
           val new_degree = d2s.resistance_or_node(name,subgoals,map,current)
-          sub_map - name + (name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(new_degree),false,false))
+          sub_map - name + (name -> GoalState(DependsOnSubgoals(),PartialSatisfaction(),new_degree,false,false))
         }
     }
   }
 
   private def update_map_leaf_node(name: String, trigger: LogicFormula, fs: LogicFormula, current: RawState, map: Map[String, GoalState]) : Map[String,GoalState] = {
     val goalstate = map(name)
-    goalstate.satisf match {
+    goalstate.sat_state match {
       case FullSatisfaction() =>map
       case Violation() =>map
-      case PartialSatisfaction(degree) =>
-        goalstate.achievement match {
+      case PartialSatisfaction() =>
+        goalstate.internal_state match {
           case Ready(cond) =>
             if (cond.satisfied_in(current)) {
               val form = builder.formula(fs).next(current)
               if (form.success_until_now && form.future_formula!=RawTT()) {
                 val new_degree = d2s.resistance_leaf_node(name,map,current)
-                map - name + (name -> GoalState(Committed(form.future_formula), PartialSatisfaction(new_degree), true, false))
+                map - name + (name -> GoalState(Committed(form.future_formula), PartialSatisfaction(),new_degree, true, false))
               } else {
-                map - name + (name -> GoalState(Completed(),FullSatisfaction(),true,true ))
+                map - name + (name -> GoalState(Completed(),FullSatisfaction(),d2s.success_value,true,true ))
               }
             } else
               map
           case Committed(cond) =>
             val next: RawFuture = cond.next(current)
             if (!next.success_until_now)
-              map - name + (name -> GoalState(Completed(),Violation(),false,false))
+              map - name + (name -> GoalState(Completed(),Violation(),d2s.failure_value,false,false))
             else if (next.future_formula==RawTT())
-              map - name + (name -> GoalState(Completed(),FullSatisfaction(),false,true))
+              map - name + (name -> GoalState(Completed(),FullSatisfaction(),d2s.success_value,false,true))
             else {
               val new_degree = d2s.resistance_leaf_node(name,map,current)
-              map - name + (name -> GoalState(Committed(next.future_formula),PartialSatisfaction(new_degree),false,false))
+              map - name + (name -> GoalState(Committed(next.future_formula),PartialSatisfaction(),new_degree,false,false))
             }
         }
     }

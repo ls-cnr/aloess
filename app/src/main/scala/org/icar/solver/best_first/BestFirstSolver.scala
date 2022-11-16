@@ -4,13 +4,10 @@ import org.icar.solver._
 import org.icar.subsymbolic.{RawAction, RawState}
 import org.icar.symbolic._
 
-import scala.collection.immutable.TreeSet
-
 class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapability], goal_model : GoalTree, metric : DomainMetric) extends AbstractSolver(onto,abstract_repo,goal_model) {
   var solution_set : List[WTSGraph] = List.empty
   val available_actions = sub_actions.actions
   val node_builder = new GlobalNodeBuilder(metric)
-  val goal_map_merger = new GoalMapMerger(goal_model.root)
 
   def get_full_solutions: List[AbstractWorkflow] = List.empty
   def num_complete_solutions: Int = solution_set.filter(x => x.is_full_solution).size
@@ -23,7 +20,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
 
     while (!termination.check_termination(start_timestamp,n_iteration,num_complete_solutions)) {
       iteration
-      println(stringIterationGraphviz(n_iteration))
+      //println(stringIterationGraphviz(n_iteration))
       n_iteration += 1
     }
 
@@ -67,12 +64,13 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     val frontier_node : Option[WTSNode] = get_next_node
     if (frontier_node.isDefined) {
       val focus_node = frontier_node.get
-
+      println(focus_node)
       val actions : List[RawAction] = applicable_capabilities(focus_node)
 
-      if (actions.nonEmpty) {
-        update_solution_set(focus_node,actions)
-      }
+      //if (actions.nonEmpty) {
+        //println("extending focus_node")
+      update_solution_set(focus_node,actions)
+      //}
     }
   }
 
@@ -84,22 +82,22 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       None
   }
   private def most_promising_wts : Option[WTSGraph] = {
-    var best_node_until_now : Option[WTSGraph] = None
+    var best_graph_until_now : Option[WTSGraph] = None
     for (wts <- solution_set if !wts.is_full_solution) {
-      if (best_node_until_now.isDefined) {
-        if (wts.graph_label.quality_of_solution > best_node_until_now.get.graph_label.quality_of_solution)
-          best_node_until_now = Some(wts)
+      if (best_graph_until_now.isDefined) {
+        if (wts.graph_label.quality_of_solution < best_graph_until_now.get.graph_label.quality_of_solution)
+          best_graph_until_now = Some(wts)
       } else {
-        best_node_until_now = Some(wts)
+        best_graph_until_now = Some(wts)
       }
     }
-    best_node_until_now
+    best_graph_until_now
   }
 
   /** a capability is applicable if the current state of world satisfies its precondition */
   private def applicable_capabilities(node : WTSNode) : List[RawAction] = {
     val state = node.memory.stable_state
-    for (a<-available_actions if a.pre.satisfied_in(state)) yield a
+    for (a<-available_actions if a.pre.satisfied_in(state) ) yield a
   }
 
 //  private def encode_expansion(node:RawNode, action : RawAction) : RawExpansion = {
@@ -147,10 +145,13 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       }
     }
 
+//    result = wts.wts_without_node_in_frontier(focusnode) :: result
+//    result
+//
     if (result.nonEmpty)
       result
     else
-      List(wts)
+      List(wts.wts_without_node_in_frontier(focusnode))
   }
 
   /**
@@ -213,7 +214,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     for (e <- exp_list ) {
       if (no_goal_violation) {
         val root_state = e.nodelabel.node_goals.map(goal_model.root.id)
-        root_state.satisf match {
+        root_state.sat_state match {
           case Violation() => no_goal_violation = false
           case _ =>
         }

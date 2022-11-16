@@ -1,9 +1,6 @@
 package org.icar.solver.best_first
 
-import org.icar.solver.{DomainMetric, FullSatisfaction, GoalMapMerger, GoalModelMap, GoalState, PartialSatisfaction, Violation}
-import org.icar.symbolic.GoalNode
-
-import scala.collection.immutable.TreeSet
+import org.icar.solver._
 
 case class WTSGraph(
                      start : WTSNode,
@@ -14,7 +11,7 @@ case class WTSGraph(
                      node_label : Map[Int,NodeLabelling],
                      tx_label : Map[Int,TxLabelling],
 
-                     frontier : TreeSet[WTSNode],
+                     frontier : List[WTSNode],
                      visited : List[WTSNode]) {
 
 
@@ -36,18 +33,45 @@ case class WTSGraph(
 
   def is_full_solution : Boolean = {
     val root_goal_name = graph_label.wts_goals.root
-    graph_label.wts_goals.map(root_goal_name).satisf == FullSatisfaction()
+    graph_label.wts_goals.map(root_goal_name).sat_state == FullSatisfaction()
   }
   def most_promising_node : Option[WTSNode] = {
-    if (frontier.nonEmpty)
-      Some(frontier.head)
-    else
-      None
+//    var selected : Option[WTSNode] = None
+//    var score = 0
+//    for (n<-frontier) {
+//      val root_state = node_label(n.id).node_goals.map(this.graph_label.wts_goals.root)
+//      root_state.satisf match {
+//        case FullSatisfaction() => metric.max
+//        case PartialSatisfaction(degree) => degree
+//        case Violation() => metric.min
+//        case _ => metric.min
+//      }
+//
+//    }
+//
+    var result : Option[WTSNode] = None
+    var degree : Double = 0
+    for (f <- frontier) {
+      val label = node_label(f.id)
+      val root_state = label.node_goals.get_root_state
+      if (root_state.sat_state.isInstanceOf[PartialSatisfaction]) {
+        val node_degree = root_state.sat_degree
+        if (node_degree > degree) {
+          result = Some(f)
+          degree = node_degree
+        }
+      }
+    }
+    //    if (frontier.nonEmpty)
+//      Some(frontier.head)
+//    else
+//      None
+    result
   }
   def is_interested_to(node: WTSNode): Boolean = {
     val not_complete = !is_full_solution
-    var node_in_frontier = false
-    for (f <- frontier) if (f.id==node.id) node_in_frontier=true
+    val node_in_frontier = frontier.contains(node)
+    //for (f <- frontier) if (f.id==node.id) node_in_frontier=true
     not_complete && node_in_frontier
   }
 
@@ -63,41 +87,51 @@ case class WTSGraph(
    * 2) check if the wts represents a full solution
    */
   def expand_wts(focusnode:WTSNode, exp_list: List[DecodeExpansion], goal_map_merger : GoalMapMerger, metric : DomainMetric) : WTSGraph = {
-    var nodes : List[WTSNode] = this.nodes
-    var transitions : List[WTSTransition] = this.transitions
-    var node_labels : Map[Int,NodeLabelling] = this.node_label
-    var tx_labels : Map[Int,TxLabelling] = this.tx_label
-    var frontier : TreeSet[WTSNode] = this.frontier
-    var visited : List[WTSNode] = this.visited
+    var up_nodes : List[WTSNode] = this.nodes
+    var up_transitions : List[WTSTransition] = this.transitions
+    var up_node_labels : Map[Int,NodeLabelling] = this.node_label
+    var up_tx_labels : Map[Int,TxLabelling] = this.tx_label
+    var up_frontier : List[WTSNode] = this.frontier.filter(x => x.id != focusnode.id)
+    var up_visited : List[WTSNode] = focusnode :: this.visited
 
-    var wts_goal_map : Map[String,GoalState] = this.graph_label.wts_goals.map
+    var up_wts_goal_map : Map[String,GoalState] = this.graph_label.wts_goals.map
 
     for (exp <- exp_list) {
-      nodes = exp.node :: nodes
-      transitions = exp.tx :: transitions
-      node_labels = node_labels + (exp.node.id -> exp.nodelabel)
+      if (!up_nodes.contains(exp.node)) {
+        up_nodes = exp.node :: up_nodes
+        up_node_labels = up_node_labels + (exp.node.id -> exp.nodelabel)
+      }
+      up_transitions = exp.tx :: up_transitions
+      up_tx_labels = up_tx_labels + (exp.tx.id -> exp.txlabel)
+
       val node_goal_state = exp.nodelabel.node_goals.map
+      up_wts_goal_map = goal_map_merger.merge_maps(up_wts_goal_map,node_goal_state)
 
-      wts_goal_map = goal_map_merger.merge_maps(wts_goal_map,node_goal_state)
-
-      tx_labels = tx_labels + (exp.tx.id -> exp.txlabel)
-      frontier = frontier - focusnode + exp.node
-      visited = focusnode :: visited
+      if (!up_visited.contains(exp.node))
+        up_frontier = exp.node :: up_frontier
     }
 
-    val quality_sol: Double = calculate_quality_of_solution(wts_goal_map,metric)
-    val graph_label = GraphLabelling(GoalModelMap( this.graph_label.wts_goals.root ,wts_goal_map),quality_sol)
-    WTSGraph(start,nodes,transitions,graph_label,node_labels,tx_labels,frontier,visited)
+    val up_quality_sol: Double = calculate_quality_of_solution(up_wts_goal_map,metric)
+    val up_graph_label = GraphLabelling(GoalModelMap( this.graph_label.wts_goals.root ,up_wts_goal_map),up_quality_sol)
+
+    WTSGraph(start,up_nodes,up_transitions,up_graph_label,up_node_labels,up_tx_labels,up_frontier,up_visited)
+  }
+
+  def wts_without_node_in_frontier(focusnode:WTSNode) : WTSGraph = {
+    val up_frontier : List[WTSNode] = this.frontier.filter(x => x.id != focusnode.id)
+    val up_visited : List[WTSNode] = focusnode :: this.visited
+    WTSGraph(start,nodes,transitions,graph_label,node_label,tx_label,up_frontier,up_visited)
   }
 
   def calculate_quality_of_solution(goal_map: Map[String, GoalState], metric : DomainMetric): Double = {
     val root_state = goal_map(this.graph_label.wts_goals.root)
-    root_state.satisf match {
-      case FullSatisfaction() => metric.max
-      case PartialSatisfaction(degree) => degree
-      case Violation() => metric.min
-      case _ => metric.min
-    }
+    root_state.sat_degree
+//    root_state.sat_state match {
+//      case FullSatisfaction() => metric.max
+//      case PartialSatisfaction() => root_state.sat_degree
+//      case Violation() => metric.min
+//      case _ => metric.min
+//    }
   }
 
 }
@@ -113,7 +147,8 @@ object WTSGraph {
       GraphLabelling(init_goal_map,0),
       Map(0->label),
       Map.empty,
-      TreeSet(start_node),List.empty
+      List(start_node),
+      List.empty
     )
   }
 }

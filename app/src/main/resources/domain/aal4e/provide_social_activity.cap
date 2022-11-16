@@ -1,0 +1,6 @@
+capability "provide_social_activity" [
+    pre: user_location(living_room) and user_engagement(social)
+    post: performed(social_activity)
+    evolution "perf. social activity" : add performed(social_activity)
+]
+      

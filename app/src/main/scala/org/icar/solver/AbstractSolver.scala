@@ -7,7 +7,9 @@ abstract class AbstractSolver(onto:DomainOntology, abstract_repo : List[Abstract
   val sub_logic = new SubLogicBuilder(onto)
   val rete_builder = new RETEBuilder(sub_logic,onto.axioms)
   val sub_actions = new ActionBuilder(sub_logic,abstract_repo)
-  val goal_state_builder = new GoalMapBuilder(sub_logic,goal_model,new EffortToSatisf(goal_model))
+  val effort_to_sat = new EffortToSatisf(goal_model)
+  val goal_state_builder = new GoalMapBuilder(sub_logic,goal_model,effort_to_sat)
+  val goal_map_merger = new GoalMapMerger(goal_model.root, effort_to_sat)
 
   var goal_model_state : GoalModelMap = GoalModelMap(goal_model.root.id,Map.empty)     // => goal state dovrebbe essere una specie di "memory" relativa al goal model
 

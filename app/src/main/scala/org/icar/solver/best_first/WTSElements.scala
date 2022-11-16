@@ -3,7 +3,6 @@ package org.icar.solver.best_first
 import org.icar.solver.GoalModelMap
 import org.icar.subsymbolic.RawLogicFormula
 import org.icar.subsymbolic.rete.Memory
-import org.icar.symbolic.GoalNode
 
 import scala.collection.immutable.TreeSet
 

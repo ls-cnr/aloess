@@ -1,0 +1,6 @@
+capability "log_activity" [
+    pre: user_localization(otherwise) or user_engagement(not_interested) or performed(social_activity) or performed(cognitive_exercise) or performed(entertainment)
+    post: activity_registered(done)
+    evolution "log" : add activity_registered(done)
+]
+      

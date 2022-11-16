@@ -1,0 +1,9 @@
+capability "engage_user" [
+    pre: user_location(living_room)
+    post: user_engagement(social) or user_engagement(open_mind) or user_engagement(passive) or user_engagement(not_interested)
+    evolution "open to sociality" : add user_engagement(social)
+    evolution "open minded" : add user_engagement(open_mind)
+    evolution "passive" : add user_engagement(passive)
+    evolution "not interested" : add user_engagement(not_interested)
+]
+      

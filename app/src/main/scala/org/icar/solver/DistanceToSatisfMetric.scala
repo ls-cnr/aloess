@@ -4,6 +4,8 @@ import org.icar.subsymbolic._
 import org.icar.symbolic.{AndGoalDecomposition, FOLGoalSpec, GoalNode, GoalSpec, GoalTree, LTLGoalSpec, MTLGoalSpec, OrGoalDecomposition}
 
 abstract class DistanceToSatisfMetric(val goal_node : GoalTree) {
+  def success_value : Double
+  def failure_value : Double
   def distance(goal_state : Map[String, GoalState], state : RawState) : Double
   def resistance_generic_node(goal: GoalNode, goal_map : Map[String, GoalState], state : RawState): Double
   def resistance_and_node(name:String, subgoals:List[GoalNode],goal_map : Map[String, GoalState], state : RawState) : Double
@@ -16,8 +18,11 @@ abstract class DistanceToSatisfMetric(val goal_node : GoalTree) {
 class EffortToSatisf(override val goal_node : GoalTree) extends DistanceToSatisfMetric(goal_node) {
   override def distance(goal_state: Map[String, GoalState], state : RawState): Double = resistance_generic_node(goal_node.root,goal_state,state)
 
-  val rmax : Double = 1000
+  val rmax : Double = 10
   val rmin : Double = 1/rmax
+
+  def success_value : Double = 0
+  def failure_value : Double = 1
 
   override def resistance_generic_node(goal: GoalNode, goal_map : Map[String, GoalState], state : RawState): Double = {
     goal match {
@@ -31,40 +36,60 @@ class EffortToSatisf(override val goal_node : GoalTree) extends DistanceToSatisf
   }
 
   override def resistance_and_node(name:String, subgoals:List[GoalNode],goal_map : Map[String, GoalState], state : RawState) : Double = {
-    val goal_state = goal_map(name)
-    goal_state.achievement match {
-      case Completed() => 1
-      case DependsOnSubgoals() =>
-        var sum: Double = 0
-        for (g<-subgoals) sum += resistance_generic_node(g,goal_map,state)
-        sum/subgoals.size
-      case _ =>0
-    }
+    var sum: Double = 0
+    for (g<-subgoals) sum += resistance_generic_node(g,goal_map,state)
+    sum/subgoals.size
+
+
+//    val goal_state = goal_map(name)
+//    goal_state.internal_state match {
+//      case Completed() => 1
+//      case DependsOnSubgoals() =>
+//        var sum: Double = 0
+//        for (g<-subgoals) sum += resistance_generic_node(g,goal_map,state)
+//        sum/subgoals.size
+//      case _ =>0
+//    }
   }
   override def resistance_or_node(name:String, subgoals:List[GoalNode],goal_map : Map[String, GoalState], state : RawState): Double = {
-    val goal_state = goal_map(name)
-    goal_state.achievement match {
-      case Completed() =>1
-      case DependsOnSubgoals() =>
-        var higher: Double = 0
-        for (g<-subgoals) higher = Math.max(higher,resistance_generic_node(g,goal_map,state))
-        higher
-      case _ => 0
-    }
+    var smaller: Double = 0
+
+    for (g<-subgoals) smaller = Math.min(smaller,resistance_generic_node(g,goal_map,state))
+    smaller
+
+//    val goal_state = goal_map(name)
+//    goal_state.internal_state match {
+//      case Completed() =>1
+//      case DependsOnSubgoals() =>
+//        var smaller: Double = 0
+//        for (g<-subgoals) smaller = Math.min(smaller,resistance_generic_node(g,goal_map,state))
+//        smaller
+//      case _ => 0
+//    }
   }
   override def resistance_leaf_node(name:String,goal_map : Map[String, GoalState], state : RawState): Double = {
     val goal_state = goal_map(name)
-    goal_state.achievement match {
-      case Ready(cond) => resistance_formula(cond,state)*0.25
-      case Committed(cond) =>0.25 + resistance_formula(cond,state)*0.75
-      case Completed() =>1
-      case _ =>0
+    goal_state.internal_state match {
+      case Ready(cond) =>
+        val value = resistance_formula(cond,state)
+        val norm = normalize_ready(value)
+        norm
+      case Committed(cond) =>
+        val value = resistance_formula(cond,state)
+        val norm = normalize_commit(value)
+        norm
+      case Completed() =>
+        if (goal_state.sat_state==FullSatisfaction())
+          success_value
+        else
+          failure_value
+      case _ => failure_value
     }
   }
 
   override def resistance_formula(formula: RawLogicFormula, state : RawState) : Double = {
     formula match {
-      case RawProposition(index) =>if (state.satisfies(index)) rmax else rmin
+      case RawProposition(index) =>if (state.satisfies(index)) rmin else rmax
       case RawTT() =>rmax
       case RawFF() =>rmin
       case RawConj(left, right) =>resistance_formula(left,state)+resistance_formula(right,state)
@@ -82,6 +107,33 @@ class EffortToSatisf(override val goal_node : GoalTree) extends DistanceToSatisf
 
   private def parallel(left: Double, right: Double): Double = {
     (left*right)/(left+right)
+  }
+
+  private def normalize(x:Double) : Double = {
+    val num : Double = x-rmin
+    val den : Double = rmax-rmin
+    val r = num/den
+    r
+    //(x-rmin)/(rmax-rmin)
+  }
+
+  private def normalize_ready(x:Double) : Double = {
+    val norm = normalize(x)
+    0.5 + (norm/2)
+//    val a : Double = rmin+((rmax-rmin)/2)
+//    val x_1 = Math.min(x+a, failure_value)
+//    normalize(x_1)
+  }
+  private def normalize_commit(x:Double) : Double = {
+    val norm = normalize(x)
+    norm/2
+
+//    val a : Double = rmin+((rmax-rmin)/2)
+//    val x_1 = x-a
+//    val num : Double = x-rmin
+//    val den : Double = a-rmin
+//    val r = num/den
+//    r
   }
 
 }

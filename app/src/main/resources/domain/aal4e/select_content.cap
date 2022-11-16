@@ -1,0 +1,6 @@
+capability "select_content" [
+    pre: user_engagement(passive)
+    post: entertainment_content(selected)
+    evolution "select content" : add entertainment_content(selected)
+]
+      
