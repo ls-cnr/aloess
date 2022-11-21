@@ -7,6 +7,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
 
 import java.time.{Duration, LocalDateTime}
+import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
 class GoalModelParserSuite extends AnyFunSuite {
@@ -134,6 +135,21 @@ class GoalModelParserSuite extends AnyFunSuite {
     val result = p.parseAll(p.goal_tree,goal_model_string)
     assert(result.successful)
 
+  }
+
+  test("parse IDS-like goal1") {
+    val goal_model_string = "model {\n    goal ids_goal when document(issue_list,received) should ensure F (document(issue_list,accepted) or document(issue_list,rejected))   \n}"
+    val p = new GoalTreeParser
+
+    val result = p.parseAll(p.goal_tree,goal_model_string)
+    assert(result.successful)
+  }
+  test("parse IDS goal") {
+    val goal_model_string = "model {\n    goal ids_goal when exists ?x in DocType, document(?x,received) should ensure F (exists ?y in DocType, (document(?y,accepted) or document(?y,rejected)))   \n}"
+    val p = new GoalTreeParser
+
+    val result = p.parseAll(p.goal_tree,goal_model_string)
+    assert(result.successful)
   }
 }
 
