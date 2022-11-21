@@ -74,7 +74,7 @@ class AAL4EMetric extends DomainMetric {
 
 
 
-object RunBestFistSolver extends App {
+object RunAAL4E_BestFistSolver extends App {
   val formula_builder = new PropositionBuilder()
   val solver = new BestFirstSolver(AAL4E.onto,AAL4E.cap_repository , AAL4E.goal_model, AAL4E.metric)
 

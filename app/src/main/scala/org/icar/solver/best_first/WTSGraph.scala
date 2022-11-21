@@ -34,21 +34,9 @@ case class WTSGraph(
   def is_full_solution : Boolean = {
     val root_goal_name = graph_label.wts_goals.root
     graph_label.wts_goals.map(root_goal_name).sat_state == FullSatisfaction()
+    //val all_leaf_node_have_not_triggers
   }
   def most_promising_node : Option[WTSNode] = {
-//    var selected : Option[WTSNode] = None
-//    var score = 0
-//    for (n<-frontier) {
-//      val root_state = node_label(n.id).node_goals.map(this.graph_label.wts_goals.root)
-//      root_state.satisf match {
-//        case FullSatisfaction() => metric.max
-//        case PartialSatisfaction(degree) => degree
-//        case Violation() => metric.min
-//        case _ => metric.min
-//      }
-//
-//    }
-//
     var result : Option[WTSNode] = None
     var degree : Double = 0
     for (f <- frontier) {
@@ -62,10 +50,6 @@ case class WTSGraph(
         }
       }
     }
-    //    if (frontier.nonEmpty)
-//      Some(frontier.head)
-//    else
-//      None
     result
   }
   def is_interested_to(node: WTSNode): Boolean = {

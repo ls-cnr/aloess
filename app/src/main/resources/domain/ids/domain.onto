@@ -1,0 +1,5 @@
+domain "ids domain" {
+    category DOC_TYPE atom [ issue_list, request, tech_rep ]
+    category DOC_STATE atom [ received,registered,worked,accepted,rejected,to_revise ]
+    define document(enum[DOC_TYPE],enum[DOC_STATE])
+}

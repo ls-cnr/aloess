@@ -1,0 +1,6 @@
+capability "work" [
+  params: ?x is DOC_TYPE
+  pre: document(?x,registered) or document(?x,to_revise)
+  post: document(?x,worked)
+  evolution "worked" : add document(?x,worked), rmv document(?x,registered), rmv document(?x,to_revise)
+]

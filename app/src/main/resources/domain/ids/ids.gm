@@ -1,0 +1,6 @@
+model {
+    goal ids_goal is and [
+        goal supervise_worked when exists ?x in DOC_TYPE, document(?x,received) should ensure F (exists ?y in DOC_TYPE, (document(?y,accepted) or document(?y,rejected)))
+        goal work_to_revise when exists ?x in DOC_TYPE, document(?x,to_revise) should ensure F exists ?y in DOC_TYPE, document(?y,worked)
+    ]
+}

@@ -1,0 +1,8 @@
+capability "revise" [
+  params: ?x is DOC_TYPE
+  pre: document(?x,worked)
+  post: document(?x,accepted) or document(?x,rejected) or document(?x,to_revise)
+  evolution "accepted" : add document(?x,accepted), rmv document(?x,worked)
+  evolution "rejected" : add document(?x,rejected), rmv document(?x,worked)
+  evolution "marked to revise" : add document(?x,to_revise), rmv document(?x,worked)
+]
