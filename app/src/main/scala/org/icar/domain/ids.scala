@@ -1,11 +1,10 @@
 package org.icar.domain
 
+import org.icar.solver.IterationTermination
 import org.icar.solver.best_first.BestFirstSolver
-import org.icar.solver.{DomainMetric, IterationTermination}
-import org.icar.subsymbolic.RawState
 import org.icar.symbolic.builder.PropositionBuilder
-import org.icar.symbolic.{AtomTerm, Proposition, StateOfWorld}
 import org.icar.symbolic.parser.{AbstractCapabilityParser, DomainOntologyParser, GoalTreeParser}
+import org.icar.symbolic.{AtomTerm, Proposition, StateOfWorld}
 
 import scala.io.Source
 
@@ -39,23 +38,14 @@ object IDS {
 
   val cap_repository = List( register_cap, work_cap, revise_cap )
 
-  val metric = new IDSMetric
 }
 
-
-
-class IDSMetric extends DomainMetric {
-  override def evaluate_state(state: RawState): Double = 0
-
-  override def max: Double = 10
-  override def min: Double = 0
-}
 
 
 
 object RunIDS_BestFistSolver extends App {
   val formula_builder = new PropositionBuilder()
-  val solver = new BestFirstSolver(IDS.onto,IDS.cap_repository , IDS.goal_model, IDS.metric)
+  val solver = new BestFirstSolver(IDS.onto,IDS.cap_repository , IDS.goal_model,None)
 
   val user_found = formula_builder.proposition("document",List(AtomTerm("issue_list"),AtomTerm("received"))).asInstanceOf[Proposition]
   val solver_result = solver.run(StateOfWorld(List(user_found)), IterationTermination(15))

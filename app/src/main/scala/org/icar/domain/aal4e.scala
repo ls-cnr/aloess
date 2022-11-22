@@ -1,10 +1,9 @@
 package org.icar.domain
 
+import org.icar.solver.IterationTermination
 import org.icar.solver.best_first.BestFirstSolver
-import org.icar.solver.{DomainMetric, IterationTermination}
-import org.icar.subsymbolic.RawState
+import org.icar.symbolic.StateOfWorld
 import org.icar.symbolic.builder.PropositionBuilder
-import org.icar.symbolic.{AtomTerm, Proposition, StateOfWorld}
 import org.icar.symbolic.parser.{AbstractCapabilityParser, DomainOntologyParser, GoalTreeParser}
 
 import scala.io.Source
@@ -60,23 +59,14 @@ object AAL4E {
 
   val cap_repository = List( find_user_cap, engage_cap,provide_social_cap,provide_cognitive_cap,provide_entertainment_cap,select_content_cap,log_cap)
 
-  val metric = new AAL4EMetric
 }
 
-
-
-class AAL4EMetric extends DomainMetric {
-  override def evaluate_state(state: RawState): Double = 0
-
-  override def max: Double = 10
-  override def min: Double = 0
-}
 
 
 
 object RunAAL4E_BestFistSolver extends App {
   val formula_builder = new PropositionBuilder()
-  val solver = new BestFirstSolver(AAL4E.onto,AAL4E.cap_repository , AAL4E.goal_model, AAL4E.metric)
+  val solver = new BestFirstSolver(AAL4E.onto,AAL4E.cap_repository , AAL4E.goal_model,None)
 
   //val user_found = formula_builder.proposition("user_location",List(AtomTerm("living_room"))).asInstanceOf[Proposition]
   val solver_result = solver.run(StateOfWorld(List()), IterationTermination(15))

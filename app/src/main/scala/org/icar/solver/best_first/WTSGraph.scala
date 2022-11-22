@@ -36,7 +36,23 @@ case class WTSGraph(
     graph_label.wts_goals.map(root_goal_name).sat_state == FullSatisfaction()
     //val all_leaf_node_have_not_triggers
   }
-  def most_promising_node : Option[WTSNode] = {
+  def most_promising_node(opt_metric : Option[DomainMetric]) : Option[WTSNode] = {
+    if (opt_metric.isDefined)
+      most_promising_node_according_score
+    else
+      most_promising_node_according_sat_degree
+  }
+  def most_promising_node_according_score : Option[WTSNode] = {
+    var result : Option[WTSNode] = None
+    var score : Double = 0
+    for (f <- frontier)
+      if (f.score > score) {
+        score = f.score
+        result = Some(f)
+      }
+    result
+  }
+  def most_promising_node_according_sat_degree : Option[WTSNode] = {
     var result : Option[WTSNode] = None
     var degree : Double = 0
     for (f <- frontier) {
@@ -70,7 +86,7 @@ case class WTSGraph(
    * 1) update the frontier data structure
    * 2) check if the wts represents a full solution
    */
-  def expand_wts(focusnode:WTSNode, exp_list: List[DecodeExpansion], goal_map_merger : GoalMapMerger, metric : DomainMetric) : WTSGraph = {
+  def expand_wts(focusnode:WTSNode, exp_list: List[DecodeExpansion], goal_map_merger : GoalMapMerger, opt_metric : Option[DomainMetric]) : WTSGraph = {
     var up_nodes : List[WTSNode] = this.nodes
     var up_transitions : List[WTSTransition] = this.transitions
     var up_node_labels : Map[Int,NodeLabelling] = this.node_label
@@ -95,7 +111,7 @@ case class WTSGraph(
         up_frontier = exp.node :: up_frontier
     }
 
-    val up_quality_sol: Double = calculate_quality_of_solution(up_wts_goal_map,metric)
+    val up_quality_sol: Double = calculate_quality_of_solution(up_wts_goal_map)
     val up_graph_label = GraphLabelling(GoalModelMap( this.graph_label.wts_goals.root ,up_wts_goal_map),up_quality_sol)
 
     WTSGraph(start,up_nodes,up_transitions,up_graph_label,up_node_labels,up_tx_labels,up_frontier,up_visited)
@@ -107,15 +123,9 @@ case class WTSGraph(
     WTSGraph(start,nodes,transitions,graph_label,node_label,tx_label,up_frontier,up_visited)
   }
 
-  def calculate_quality_of_solution(goal_map: Map[String, GoalState], metric : DomainMetric): Double = {
+  def calculate_quality_of_solution(goal_map: Map[String, GoalState]): Double = {
     val root_state = goal_map(this.graph_label.wts_goals.root)
     root_state.sat_degree
-//    root_state.sat_state match {
-//      case FullSatisfaction() => metric.max
-//      case PartialSatisfaction() => root_state.sat_degree
-//      case Violation() => metric.min
-//      case _ => metric.min
-//    }
   }
 
 }

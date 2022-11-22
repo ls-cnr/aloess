@@ -4,12 +4,13 @@ import org.icar.solver._
 import org.icar.subsymbolic.{RawAction, RawState}
 import org.icar.symbolic._
 
-class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapability], goal_model : GoalTree, metric : DomainMetric) extends AbstractSolver(onto,abstract_repo,goal_model) {
+class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapability], goal_model : GoalTree, opt_metric : Option[DomainMetric]) extends AbstractSolver(onto,abstract_repo,goal_model) {
   var solution_set : List[WTSGraph] = List.empty
   val available_actions = sub_actions.actions
-  val node_builder = new GlobalNodeBuilder(metric)
+  val node_builder = new GlobalNodeBuilder(opt_metric)
 
-  def get_full_solutions: List[AbstractWorkflow] = List.empty
+  def get_full_solutions: List[WTSGraph] = solution_set.filter(x => x.is_full_solution)
+  //def get_full_solutions: List[AbstractWorkflow] = List.empty
   def num_complete_solutions: Int = solution_set.filter(x => x.is_full_solution).size
 
   override def run(start:StateOfWorld, termination:TerminationCondition) : SolverOutcome = {
@@ -30,8 +31,10 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
 
     if (full_solutions.nonEmpty)
       FullSolutions(full_solutions,n_iteration,elapsed)
-    else
-      SolverError("in-work",n_iteration,elapsed)
+    else {
+      PartialSolutions(solution_set,n_iteration,elapsed)
+      //SolverError("in-work",n_iteration,elapsed)
+    }
 
   }
 
@@ -67,19 +70,20 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       println(focus_node)
       val actions : List[RawAction] = applicable_capabilities(focus_node)
 
-      //if (actions.nonEmpty) {
-        //println("extending focus_node")
       update_solution_set(focus_node,actions)
-      //}
     }
   }
 
   private def get_next_node : Option[WTSNode] = {
-    val optwts = most_promising_wts
-    if (optwts.isDefined)
-      optwts.get.most_promising_node
-    else
-      None
+    if (opt_metric.isDefined)
+      most_promising_node_by_score
+    else {
+      val optwts = most_promising_wts
+      if (optwts.isDefined)
+        optwts.get.most_promising_node(opt_metric)
+      else
+        None
+    }
   }
   private def most_promising_wts : Option[WTSGraph] = {
     var best_graph_until_now : Option[WTSGraph] = None
@@ -92,6 +96,19 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       }
     }
     best_graph_until_now
+  }
+  private def most_promising_node_by_score : Option[WTSNode] = {
+    var score_until_now : Double = 0
+    var best_node_until_node : Option[WTSNode] = None
+    for (wts <- solution_set if !wts.is_full_solution) {
+      val best_node_for_wts = wts.most_promising_node(opt_metric)
+      if (best_node_for_wts.isDefined)
+        if (best_node_for_wts.get.score > score_until_now) {
+          score_until_now = best_node_for_wts.get.score
+          best_node_until_node = best_node_for_wts
+        }
+    }
+    best_node_until_node
   }
 
   /** a capability is applicable if the current state of world satisfies its precondition */
@@ -139,7 +156,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       if (pre_exp_test) {
          val post_exp_test = check_invariants(wts,focusnode,wts_exp_list)
           if (post_exp_test) {
-          val updated_wts : WTSGraph = wts.expand_wts(focusnode,wts_exp_list,goal_map_merger,metric)
+          val updated_wts : WTSGraph = wts.expand_wts(focusnode,wts_exp_list,goal_map_merger,opt_metric)
           result = updated_wts :: result
         }
       }

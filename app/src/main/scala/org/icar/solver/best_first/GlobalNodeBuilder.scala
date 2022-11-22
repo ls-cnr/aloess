@@ -8,12 +8,14 @@ import org.icar.subsymbolic.rete.Memory
  * this class ensure ids for nodes are assigned with a global scope
  * every wts has the same id for the same name
  */
-class GlobalNodeBuilder(metric : DomainMetric) {
+class GlobalNodeBuilder(opt_metric : Option[DomainMetric]) {
   var node_ids : Map[RawState,Int] = Map.empty
   var scores : Map[Int, Double] = Map.empty
   def get_or_create_node(memory:Memory) : WTSNode = {
     if (!node_ids.contains(memory.stable_state)) {
-      val score = metric.evaluate_state(memory.stable_state)
+      var score : Double = 0
+      if (opt_metric.isDefined)
+        score = opt_metric.get.evaluate_state(memory.stable_state)
       val node = WTSNode(node_ids.size,memory,score)
       node_ids = node_ids + (memory.stable_state -> node.id)
       scores = scores + (node.id -> score)

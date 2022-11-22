@@ -7,7 +7,6 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.junit.JUnitRunner
 
 import java.time.{Duration, LocalDateTime}
-import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
 class GoalModelParserSuite extends AnyFunSuite {

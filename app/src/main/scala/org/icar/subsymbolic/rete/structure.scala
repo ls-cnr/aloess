@@ -114,7 +114,7 @@ class ProductionNode(val myrete:RETE,val pid:Int,val production:Int) extends Ret
   }
 
   def count_tokens(memory: Memory) : Int = {
-    if (memory.prod_tokens.isEmpty)
+    if (memory.prod_tokens.isEmpty || !memory.prod_tokens.contains(pid) )
       0
     else {
       memory.prod_tokens(pid).tokens.filter(x => x._2==true).size
