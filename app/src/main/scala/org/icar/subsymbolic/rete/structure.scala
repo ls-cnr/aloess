@@ -95,16 +95,23 @@ class BetaNode(val myrete:RETE,val bid:Int,val consequence:ReteNode) extends Ret
       else agenda.memory.set_beta_right_token(bid, true)
 
     val updated_agenda = Agenda(updated_memory, agenda.todo, agenda.done)
-    consequence.add_token(updated_agenda, this)
+    //consequence.add_token(updated_agenda, this)
+    check_activation(updated_agenda)
   }
 
   override def rmv_token(agenda: Agenda, from: ReteNode): Agenda = {
+    val n_tokens_before = agenda.memory.beta_tokens.getOrElse(bid,BetaToken(false,false)).count
     val updated_memory: Memory =
       if (from == left_up.get) agenda.memory.set_beta_left_token(bid, false)
       else agenda.memory.set_beta_right_token(bid, false)
 
     val updated_agenda = Agenda(updated_memory, agenda.todo, agenda.done)
-    consequence.rmv_token(updated_agenda, this)
+
+    if (n_tokens_before==2)
+      consequence.rmv_token(updated_agenda, this)
+    else
+      updated_agenda
+    //check_activation(updated_agenda)
   }
 
   def check_activation(agenda : Agenda): Agenda = {
@@ -127,8 +134,12 @@ class ProductionNode(val myrete:RETE,val pid:Int,val production:Int) extends Ret
     val prodtoken = agenda.memory.prod_tokens.getOrElse(pid,ProdToken(false))
     if (prodtoken.token==false) {
       val updated_memory = agenda.memory.set_prod_token(pid, true)
-      val updated_todo = RawAdd(RawProposition(production)) :: agenda.todo
-      Agenda(updated_memory,updated_todo,agenda.done)
+      if (!agenda.todo.contains(RawAdd(RawProposition(production)))) {
+        val updated_todo = RawAdd(RawProposition(production)) :: agenda.todo
+        Agenda(updated_memory, updated_todo, agenda.done)
+      } else {
+        Agenda(updated_memory, agenda.todo, agenda.done)
+      }
     } else {
       agenda
     }
@@ -138,8 +149,12 @@ class ProductionNode(val myrete:RETE,val pid:Int,val production:Int) extends Ret
     val prodtoken = agenda.memory.prod_tokens.getOrElse(pid,ProdToken(false))
     if (prodtoken.token==true) {
       val updated_memory = agenda.memory.set_prod_token(pid, false)
-      val updated_todo = RawRem(RawProposition(production)) :: agenda.todo
-      Agenda(updated_memory,updated_todo,agenda.done)
+      if (!agenda.todo.contains(RawRem(RawProposition(production)))) {
+        val updated_todo = RawRem(RawProposition(production)) :: agenda.todo
+        Agenda(updated_memory, updated_todo, agenda.done)
+      } else {
+        Agenda(updated_memory, agenda.todo, agenda.done)
+      }
     } else {
       agenda
     }

@@ -33,7 +33,7 @@ class RETESuite extends AnyFunSuite {
     val rete_builder = new RETEBuilder(logic_builder,onto.axioms)
 
     val myrete = rete_builder.rete
-    assert(myrete.alpha_map.size==6)
+    assert(myrete.dir_alpha_map.size+myrete.inv_alpha_map.size==6)
     assert(myrete.betas.size==9)
     assert(myrete.prods.size==1)
 
@@ -156,6 +156,7 @@ class RETESuite extends AnyFunSuite {
 
     val myrete = rete_builder.rete
 
+    //println(myrete.stringGraphviz(sub_logic.inverse))
     val wi = sub_logic.state(initial)
     val start_memory = myrete.reset_memory(wi)
 

@@ -60,6 +60,13 @@ case class Memory(
 }
 
 case class AlphaToken(token : Boolean)
-case class BetaToken(left : Boolean, right:Boolean)
+case class BetaToken(left : Boolean, right:Boolean) {
+  def count : Int = {
+    var count = 0
+    if (left) count +=1
+    if (right) count += 1
+    count
+  }
+}
 case class ProdToken(token : Boolean)
 

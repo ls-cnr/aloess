@@ -22,7 +22,8 @@ case class Agenda(memory:Memory,todo:List[RawEvoOperator],done:List[RawEvoOperat
 
 class RETE {
   /* static part */
-  var alpha_map : Map[Int,AlphaNode] = Map.empty
+  var dir_alpha_map : Map[Int,DirectAlphaNode] = Map.empty
+  var inv_alpha_map : Map[Int,InverseAlphaNode] = Map.empty
   var betas : List[BetaNode] = List.empty
   var prods : List[ProductionNode] = List.empty
   var id_to_use = 0
@@ -40,34 +41,44 @@ class RETE {
     update(agenda)
   }
   def reset_memory(wi: RawState):Memory = {
-    val zero_memory = Memory(wi,Map.empty,Map.empty,Map.empty)
-    var todo:List[RawEvoOperator] = List.empty
-    for (index <- 0 to wi.satisfies.size-1) {
-      if (wi.satisfies(index))
-        todo = RawAdd(RawProposition(index)) :: todo
-//      else
-//        todo = RawRem(RawProposition(index)) :: todo
+    val zero_memory = Memory(wi, Map.empty, Map.empty, Map.empty)
+    var agenda = Agenda(zero_memory, List.empty, List.empty)
+    for (index <- 0 to wi.satisfies.size - 1) {
+      if (wi.satisfies(index)) {
+        if (dir_alpha_map.contains(index)) {
+          val alpha = dir_alpha_map(index)
+          agenda = alpha.check_activation(agenda)
+        }
+      } else {
+        if (inv_alpha_map.contains(index)) {
+          val alpha = inv_alpha_map(index)
+          agenda = alpha.check_activation(agenda)
+        }
+      }
     }
-    val agenda = Agenda(zero_memory,todo,List.empty)
+    agenda = activate_beta_layer(agenda)
     update(agenda)
   }
-
 
   def update(agenda : Agenda) : Memory = {
     var updated_agenda = agenda
 
+    var last_pass = false
     while (!updated_agenda.todo.isEmpty) {
       // check flip condition that reveals unstable state
-      if (updated_agenda.check_flip)
-        throw new UnstableRETECondition()
+      if (!last_pass)
+        if (updated_agenda.check_flip)
+          throw new UnstableRETECondition()
 
       val op = updated_agenda.todo.head
 
       updated_agenda = Agenda(updated_agenda.memory,updated_agenda.todo.tail,updated_agenda.done)
       updated_agenda = process_operator(updated_agenda,op)
 
-      if (updated_agenda.todo.isEmpty)
+      if (!last_pass && updated_agenda.todo.isEmpty) {
+        last_pass = true
         updated_agenda = activate_beta_layer(updated_agenda)
+      }
     }
 
     updated_agenda.memory
@@ -81,11 +92,16 @@ class RETE {
       case RawRem(rmv) =>
         activation = rmv.index
     }
-    if (alpha_map.contains(activation)) {
-      val alpha = alpha_map(activation)
-      alpha.check_activation(Agenda(updated_memory, agenda.todo, operator :: agenda.done))
-    } else
-      Agenda(updated_memory, agenda.todo, operator :: agenda.done)
+    var updated_agenda = Agenda(updated_memory, agenda.todo, operator :: agenda.done)
+    if (dir_alpha_map.contains(activation)) {
+      val alpha = dir_alpha_map(activation)
+      updated_agenda = alpha.check_activation(updated_agenda)
+    }
+    if (inv_alpha_map.contains(activation)) {
+      val alpha = inv_alpha_map(activation)
+      updated_agenda = alpha.check_activation(updated_agenda)
+    }
+    updated_agenda
   }
   def activate_beta_layer(agenda:Agenda) : Agenda = {
     var updated_agenda = agenda
@@ -96,17 +112,20 @@ class RETE {
   }
 
   def get_or_create_alpha_node(activation: Int, inverse:Boolean) : AlphaNode = {
-    val selected = alpha_map.getOrElse(activation, {
-      // add new alpha
-      val alpha =
-        if (!inverse) new DirectAlphaNode(this, id_to_use, activation, List.empty)
-        else new InverseAlphaNode(this, id_to_use, activation, List.empty)
-      id_to_use += 1
-      alpha_map += activation -> alpha
-      alpha
-    })
-
-    selected
+    if (!inverse)
+      dir_alpha_map.getOrElse(activation, {
+        val alpha = new DirectAlphaNode(this, id_to_use, activation, List.empty)
+        id_to_use += 1
+        dir_alpha_map += activation -> alpha
+        alpha
+      })
+    else
+      inv_alpha_map.getOrElse(activation, {
+        val alpha = new InverseAlphaNode(this, id_to_use, activation, List.empty)
+        id_to_use += 1
+        inv_alpha_map += activation -> alpha
+        alpha
+      })
    }
 
   def get_or_create_beta_node(consequence : ReteNode) : BetaNode = {
@@ -131,7 +150,7 @@ class RETE {
   def stringGraphviz : String = {
     var string = "digraph Rete {\n"
 
-    for (n <- alpha_map.values) {
+    for (n <- dir_alpha_map.values ++ inv_alpha_map.values) {
       string += "\"" + n.node_label + "\"; \n"
       for (c <- n.consequences) {
         string += "\"" + n.node_label + "\""
@@ -155,7 +174,7 @@ class RETE {
   def stringGraphviz(b : ArrayBuffer[Proposition]) : String = {
     var string = "digraph Rete {\n"
 
-    for (n <- alpha_map.values) {
+    for (n <- dir_alpha_map.values ++ inv_alpha_map.values) {
       n match {
         case node: DirectAlphaNode =>
           val act = b(node.activation)
@@ -228,38 +247,35 @@ object RunRete extends App {
 
 
 }
-//
-//object RunRete2 extends App {
-//  val domain_parser = new DomainOntologyParser
-//
-//  val onto_parser = domain_parser.parseAll(domain_parser.domain,"domain \"prova5\" {  " +
-//    "category users atom [ luca,john,claudia ] " +
-//    "category rooms string [ \"livingroom\",\"kitchen\",\"bedroom\" ]  " +
-//    "category sensor_id number [ 1,2,3 ]  " +
-//
-//    "define input(enum[users])" +
-//    "define output(enum[users])" +
-//    "define room(enum[rooms])" +
-//
-//    "rule input(?a), not output(?b) => room(\"kitchen\")" +
-//
-//    "}")
-//
-//  val onto = onto_parser.get
-//  val logic_builder = new SubLogicBuilder(onto)
-//  val rete_builder = new RETEBuilder(logic_builder,onto.axioms)
-//
-//  val myrete = rete_builder.rete
-//  println(myrete.stringGraphviz)
-//  val wi = RawState(Array(false,false,false,false,false,false,false,false,false))
-//  val start_memory = myrete.reset_memory(wi)
-//  println(start_memory)
-//  val updated_memory1 = myrete.add_fact(start_memory,RawProposition(0))
-//  println(updated_memory1)
-//  val updated_memory2 = myrete.add_fact(updated_memory1,RawProposition(4))
-//  println(updated_memory2)
-//  val updated_memory3 = myrete.rmv_fact(updated_memory2,RawProposition(4))
-//  println(updated_memory3)
-//
-//
-//}
+
+object RunRete2 extends App {
+  val domain_parser = new DomainOntologyParser
+
+  val onto_parser = domain_parser.parseAll(domain_parser.domain,"domain \"prova5\" {  " +
+    "category users atom [ luca,john,claudia ] " +
+    "category rooms string [ \"livingroom\",\"kitchen\",\"bedroom\" ]  " +
+    "category sensor_id number [ 1,2,3 ]  " +
+
+    "define input(enum[users])" +
+    "define output(enum[users])" +
+    "define room(enum[rooms])" +
+
+    "rule input(?a), output(?b) => room(\"kitchen\")" +
+
+    "}")
+
+  val onto = onto_parser.get
+  val logic_builder = new SubLogicBuilder(onto)
+  val rete_builder = new RETEBuilder(logic_builder,onto.axioms)
+
+  val myrete = rete_builder.rete
+  println(myrete.stringGraphviz(logic_builder.inverse))
+  val wi = RawState(Array(false,false,false,false,false,true,false,false,false))
+  val start_memory = myrete.reset_memory(wi)
+
+  println(start_memory)
+
+  val evolution_scenario = RawEvolution("act",List(RawAdd(RawProposition(0)),RawAdd(RawProposition(4)),RawRem(RawProposition(5))),0)
+  val updated_memory = myrete.evolution(start_memory,evolution_scenario.evo)
+  println(updated_memory)
+}
