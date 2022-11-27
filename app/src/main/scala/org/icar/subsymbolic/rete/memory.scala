@@ -1,6 +1,6 @@
 package org.icar.subsymbolic.rete
 
-import org.icar.subsymbolic.{RawProposition, RawState}
+import org.icar.subsymbolic.{RawAdd, RawEvoOperator, RawProposition, RawRem, RawState}
 
 case class Memory(
                    stable_state:RawState,
@@ -8,9 +8,17 @@ case class Memory(
                    beta_tokens:Map[Int,BetaToken],
                    prod_tokens:Map[Int,ProdToken]
                  ) {
-  def touch(prop: RawProposition, value : Boolean) : Memory = {
-    val updated_state = stable_state.touch(prop.index,value)
-    Memory(updated_state,alpha_tokens,beta_tokens,prod_tokens)
+
+  def apply_operator(operator: RawEvoOperator) : Memory = {
+    operator match {
+      case RawAdd(add) =>
+        val updated_state = stable_state.touch(add.index,true)
+        Memory(updated_state,alpha_tokens,beta_tokens,prod_tokens)
+      case RawRem(rmv) =>
+        val updated_state = stable_state.touch(rmv.index,false)
+        Memory(updated_state,alpha_tokens,beta_tokens,prod_tokens)
+      case _ => throw new UnavailableRETEOperator()
+    }
   }
 
   def set_alpha_token(aid: Int,value:Boolean) : Memory = {
@@ -44,22 +52,14 @@ case class Memory(
     }
   }
 
-  def set_prod_token(pid: Int, bid:Int, value:Boolean) : Memory = {
-    if (prod_tokens.contains(pid)) {
-      val token_map = prod_tokens(pid).tokens
-      val updated_prod_memory = ProdToken(token_map + (bid->value))
-      val updated_prod = prod_tokens - pid + (pid -> updated_prod_memory)
-      Memory(stable_state,alpha_tokens,beta_tokens,updated_prod)
-    } else {
-      val updated_prod_memory = ProdToken(Map(bid->value))
-      val updated_prod = prod_tokens + (pid -> updated_prod_memory)
-      Memory(stable_state,alpha_tokens,beta_tokens,updated_prod)
-    }
+  def set_prod_token(pid: Int, value:Boolean) : Memory = {
+    val updated_prod = prod_tokens + (pid -> ProdToken(value))
+    Memory(stable_state,alpha_tokens,beta_tokens,updated_prod)
   }
 
 }
 
 case class AlphaToken(token : Boolean)
 case class BetaToken(left : Boolean, right:Boolean)
-case class ProdToken(tokens : Map[Int,Boolean])
+case class ProdToken(token : Boolean)
 

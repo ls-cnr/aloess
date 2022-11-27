@@ -1,8 +1,8 @@
 package org.icar.subsymbolic.builder
 
-import org.icar.subsymbolic.rete.{AlphaNode, BetaNode, ProductionNode, RETE, ReteNode}
+import org.icar.subsymbolic.rete.{RETE, ReteNode}
 import org.icar.symbolic.parser.DomainOntologyParser
-import org.icar.symbolic.{ArgumentType, Axiom, BoundedIntervalArgument, ConstantArgument, ConstantTerm, EnumerableArgument, Expression, NegateCondition, NumberTerm, Predicate, PredicateCondition, Proposition, RuleCondition, VariableTerm}
+import org.icar.symbolic._
 
 class RETEBuilder(val builder : SubLogicBuilder, axioms : List[Axiom]) {
   var rete = new RETE
@@ -84,6 +84,8 @@ class RETEBuilder(val builder : SubLogicBuilder, axioms : List[Axiom]) {
     //      case term: ConstantTerm => term
     //    }
     //    val p = Proposition(cons.functional,ground_args)
+
+
     val p = cons.to_proposition(assigned)
     val production = builder.direct(p)
 
