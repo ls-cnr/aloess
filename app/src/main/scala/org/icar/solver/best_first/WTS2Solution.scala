@@ -73,7 +73,7 @@ class WTS2Solution(wts:WTSGraph, action_register : Map[Int,CapabilityEntry], I :
   private def visit_XOR(arcs: Set[WTSTransition]) : AbstractWorkflowItem = {
     val source : Int = arcs.head.origin
     val src_cap_entry = action_register(source)
-    val outports = for (t<-arcs.toList) yield t.name
+    val outports = for (t<-arcs.toList) yield wts.tx_label(t.id).scenario_id
 
     val task_item = addTask(src_cap_entry)
     val src_node :WTSNode = wts.get_node_by_ID(source).get
@@ -84,7 +84,8 @@ class WTS2Solution(wts:WTSGraph, action_register : Map[Int,CapabilityEntry], I :
 
     for (tx <- arcs) {
       val dst_node :WTSNode = wts.get_node_by_ID(tx.destination).get
-      visit_node(dst_node,split_item,tx.name)
+      val scenario = wts.tx_label(tx.id).scenario_id
+      visit_node(dst_node,split_item,scenario)
     }
 
     task_item

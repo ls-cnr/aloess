@@ -1,6 +1,7 @@
 package org.icar.domain
 
-import org.icar.solver.IterationTermination
+import org.icar.domain.RunIDS_BestFistSolver.{solver, solver_result}
+import org.icar.solver.{FullSolutions, IterationTermination, PartialSolutions, SolverError}
 import org.icar.solver.best_first.BestFirstSolver
 import org.icar.symbolic.StateOfWorld
 import org.icar.symbolic.builder.PropositionBuilder
@@ -70,6 +71,17 @@ object RunAAL4E_BestFistSolver extends App {
 
   //val user_found = formula_builder.proposition("user_location",List(AtomTerm("living_room"))).asInstanceOf[Proposition]
   val solver_result = solver.run(StateOfWorld(List()), IterationTermination(15))
-  println(solver.stringIterationGraphviz(0))
+
+  solver_result match {
+    case FullSolutions(full, iterations, elapsed) =>
+      println(s"*** ${full.size} FULL SOLUTIONS ($elapsed ms, $iterations its) ***")
+      full.foreach( s => println(s.stringGraphviz()) )
+    case PartialSolutions(partial, iterations, elapsed) =>
+      println(s"*** ${solver.solution_set.size} PARTIAL SOLUTIONS ($elapsed ms, $iterations its) ***")
+      println(solver.stringIterationGraphviz(6))
+    case SolverError(msg, iterations, elapsed) =>
+      println("*** ERROR ***")
+    case _ =>
+  }
 
 }
