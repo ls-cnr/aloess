@@ -1,8 +1,6 @@
 package org.icar.solver.best_first
 
 import org.icar.solver._
-import org.icar.subsymbolic.builder.ActionBuilder
-import org.icar.symbolic.CapabilityEntry
 
 case class WTSGraph(
                      name : String,
@@ -16,6 +14,14 @@ case class WTSGraph(
 
                      frontier : List[WTSNode],
                      visited : List[WTSNode]) {
+
+  def get_node_by_ID(node_id : Int): Option[WTSNode] = {
+    var opt_node : Option[WTSNode] = None
+    for (n<-nodes)
+      if (n.id == node_id)
+        opt_node = Some(n)
+    opt_node
+  }
 
 
   def stringGraphviz: String = {

@@ -9,8 +9,17 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
   val available_actions = sub_actions.actions
   val node_builder = new GlobalNodeBuilder(opt_metric)
 
-  def get_full_solutions: List[WTSGraph] = solution_set.filter(x => x.is_full_solution)
-  //def get_full_solutions: List[AbstractWorkflow] = List.empty
+  def get_complete_wts: List[WTSGraph] = solution_set.filter(x => x.is_full_solution)
+  def get_full_solutions (wi: StateOfWorld): List[AbstractWorkflow] = {
+    var output : List[AbstractWorkflow] = List.empty
+    val complete = get_complete_wts
+    for (wts <- complete) {
+      val converter = new WTS2Solution(wts,sub_actions.action_register,wi,goal_model.meta)
+      val solution = converter.build_abstract
+      output = solution :: output
+    }
+    output
+  }
   def num_complete_solutions: Int = solution_set.filter(x => x.is_full_solution).size
 
   override def run(start:StateOfWorld, termination:TerminationCondition) : SolverOutcome = {
@@ -27,10 +36,10 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
 
     val end_timestamp: Long = System.currentTimeMillis
     val elapsed = end_timestamp-start_timestamp
-    val full_solutions = get_full_solutions
+    val compl_solutions = get_full_solutions(start)
 
-    if (full_solutions.nonEmpty)
-      FullSolutions(full_solutions,n_iteration,elapsed)
+    if (compl_solutions.nonEmpty)
+      FullSolutions(compl_solutions,n_iteration,elapsed)
     else {
       PartialSolutions(solution_set,n_iteration,elapsed)
       //SolverError("in-work",n_iteration,elapsed)
@@ -69,7 +78,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     val frontier_node : Option[WTSNode] = get_next_node
     if (frontier_node.isDefined) {
       val focus_node = frontier_node.get
-      println(focus_node)
+      //println(focus_node)
       val actions : List[RawAction] = applicable_capabilities(focus_node)
 
       update_solution_set(focus_node,actions)

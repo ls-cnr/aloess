@@ -35,7 +35,7 @@ object RunSPS_sample_circuit_BestFistSolver extends App {
   val mission = builder.sample_circuit_mission
   val initial = builder.sample_circuit_initial
 
-  circuit.print_for_graphviz()
+  //circuit.print_for_graphviz()
 
   val sps_metric = new ForceField(circuit,mission)
   val solver = new BestFirstSolver(circuit.onto,circuit.cap_repository , circuit.goal_model(mission),Some(sps_metric))
@@ -44,7 +44,7 @@ object RunSPS_sample_circuit_BestFistSolver extends App {
   solver_result match {
     case FullSolutions(full, iterations, elapsed) =>
       println("*** FULL SOLUTIONS ***")
-      full.foreach( s => println(s.stringGraphviz) )
+      full.foreach( s => println(s.stringGraphviz()) )
     case PartialSolutions(partial, iterations, elapsed) =>
       println("*** 0 FULL SOLUTIONS ***")
       println(s"*** ${partial.size} PARTIAL SOLUTIONS ***")
@@ -72,7 +72,7 @@ object RunSPS_circuit3_BestFistSolver extends App {
   solver_result match {
     case FullSolutions(full, iterations, elapsed) =>
       println("*** FULL SOLUTIONS ***")
-      full.foreach( s => println(s.stringGraphviz) )
+      full.foreach( s => println(s.stringGraphviz()) )
     case PartialSolutions(partial, iterations, elapsed) =>
       println("*** 0 FULL SOLUTIONS ***")
       println(s"*** ${partial.size} PARTIAL SOLUTIONS ***")
