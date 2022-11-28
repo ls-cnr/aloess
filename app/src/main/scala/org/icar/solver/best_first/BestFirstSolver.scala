@@ -35,7 +35,9 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       PartialSolutions(solution_set,n_iteration,elapsed)
       //SolverError("in-work",n_iteration,elapsed)
     }
-
+  }
+  def manual_run(start:StateOfWorld) : Unit = {
+    solution_set = init_solution_set(start)
   }
 
   def stringIterationGraphviz(it:Int): String = {
@@ -73,6 +75,10 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       update_solution_set(focus_node,actions)
     }
   }
+  def manual_iteration(focus_node: WTSNode, action : RawAction) : Unit = {
+    update_solution_set(focus_node,List(action))
+  }
+
 
   private def get_next_node : Option[WTSNode] = {
     if (opt_metric.isDefined)
@@ -84,6 +90,24 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       else
         None
     }
+  }
+  def manual_get_node(id : Int) : Option[WTSNode] = {
+    var optnode : Option[WTSNode] = None
+
+    for (wts <- solution_set if !optnode.isDefined) {
+      optnode = wts.manual_get_node(id)
+    }
+
+    optnode
+  }
+  def manual_get_action(id : Int) : Option[RawAction] = {
+    var optaction : Option[RawAction] = None
+
+    for (a <- sub_actions.actions)
+      if (a.id == id)
+        optaction = Some(a)
+
+    optaction
   }
   private def most_promising_wts : Option[WTSGraph] = {
     var best_graph_until_now : Option[WTSGraph] = None
@@ -132,9 +156,12 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
   private def update_solution_set(node:WTSNode, exp_list:List[RawAction]) : Unit = {
     var new_solution_set : List[WTSGraph] = List.empty
     for (wts <- solution_set ) {
-      if (wts.is_interested_to(node)) {
+      val flag = wts.is_interested_to(node)
+      if (flag) {
         val split_wts = apply_expansion(wts,node,exp_list)
         new_solution_set = new_solution_set ::: split_wts
+      } else {
+        new_solution_set = wts.wts_without_node_in_frontier(node) :: new_solution_set
       }
     }
     solution_set = new_solution_set
@@ -150,14 +177,16 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
   private def apply_expansion(wts:WTSGraph, focusnode:WTSNode, exp_list: List[RawAction]) : List[WTSGraph] = {
     var result : List[WTSGraph] = List.empty
 
+    var counter : Int = 0
     for (exp <- exp_list) {
       val wts_exp_list = prepare_wts_expansion(wts,focusnode,exp)
       val pre_exp_test = check_goal_violations(wts_exp_list)
       if (pre_exp_test) {
          val post_exp_test = check_invariants(wts,focusnode,wts_exp_list)
           if (post_exp_test) {
-          val updated_wts : WTSGraph = wts.expand_wts(focusnode,wts_exp_list,goal_map_merger,opt_metric)
-          result = updated_wts :: result
+            val updated_wts : WTSGraph = wts.expand_wts(counter.toString,focusnode,wts_exp_list,goal_map_merger,opt_metric)
+            counter += 1
+            result = updated_wts :: result
         }
       }
     }
@@ -185,7 +214,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     var tx_counter = wts.transitions.size
     for (effect <- exp.effects) {
 
-      val trajectory = rete.evolution(focusnode.memory,effect)
+      val trajectory = rete.evolution(focusnode.memory,effect.evo)
 
       val dest_node : WTSNode = node_builder.get_or_create_node(trajectory)
 
@@ -194,7 +223,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
       val invariants = exp.invariant :: wts.node_label(focusnode.id).invariants
 
       val node_label = NodeLabelling(updated_map,invariants)
-      val tx = WTSTransition(tx_counter,focusnode.id,dest_node.id)
+      val tx = WTSTransition(tx_counter,exp.name,focusnode.id,dest_node.id)
       val txlabel = TxLabelling(exp.id,effect.name)
       tx_counter += 1
 

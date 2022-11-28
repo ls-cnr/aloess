@@ -1,6 +1,6 @@
 package org.icar.subsymbolic
 
-case class RawAction(id:Int,pre:RawLogicFormula,effects:List[RawEvolution],invariant:RawLogicFormula)
+case class RawAction(id:Int,name:String,pre:RawLogicFormula,effects:List[RawEvolution],invariant:RawLogicFormula)
 
 case class RawEvolution(name : String, evo : List[RawEvoOperator], probability : Double)
 

@@ -11,6 +11,7 @@ import org.icar.subsymbolic.rete.Memory
 class GlobalNodeBuilder(opt_metric : Option[DomainMetric]) {
   var node_ids : Map[RawState,Int] = Map.empty
   var scores : Map[Int, Double] = Map.empty
+
   def get_or_create_node(memory:Memory) : WTSNode = {
     if (!node_ids.contains(memory.stable_state)) {
       var score : Double = 0
@@ -26,4 +27,5 @@ class GlobalNodeBuilder(opt_metric : Option[DomainMetric]) {
       WTSNode(id,memory,score)
     }
   }
+
 }

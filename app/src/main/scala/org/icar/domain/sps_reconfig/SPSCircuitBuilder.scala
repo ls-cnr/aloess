@@ -62,7 +62,6 @@ class SPSCircuitBuilder {
   def sample_circuit_mission = SPSMission(List("load1","load2"),List.empty,List.empty)
   def sample_circuit_initial = StateOfWorld(List(
     Proposition("on_gen",List(AtomTerm("mg1"))),
-    //GroundPredicate("closed_sw",List(AtomTerm("sw1"))),
     Proposition("closed_sw",List(AtomTerm("sw2"))),
     Proposition("closed_sw",List(AtomTerm("sw3"))),
     Proposition("pos1_sel",List(AtomTerm("sel1"))),

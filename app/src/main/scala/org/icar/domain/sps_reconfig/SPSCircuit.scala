@@ -7,7 +7,6 @@ import org.icar.symbolic.builder.DomainOntologyBuilder
 import org.icar.symbolic.parser.AbstractCapabilityParser
 
 import scala.io.Source
-import scala.util.Random
 
 class SPSCircuit (
     var nodes: List[SimpleNode],
@@ -119,7 +118,7 @@ class SPSCircuit (
 
       }
 
-      // dest ^ closed => source
+      // dest ^ !failure => source
       if (!fail.source.isInstanceOf[Generator]){
         val c_ante1 = PredicateCondition( fail.dest.up_condition.to_predicate )
         val c_ante2 = NegateCondition( fail.fired_predicate.to_predicate )
@@ -171,9 +170,9 @@ class SPSCircuit (
         id = "mutex_"+mutex_counter+"_pos1",
         params = List.empty,
 
-        pre = Conjunction(List(Negation(sw1),sw2)),
+        pre = sw2,
 
-        post = Conjunction(List(sw1,Negation(sw2))),
+        post = sw1,
 
         effects = List(
           EvolutionGrounding(s"mutex_${mutex_counter}_pos1",List(
@@ -188,9 +187,9 @@ class SPSCircuit (
         id = "mutex_"+mutex_counter+"_pos2",
         params = List.empty,
 
-        pre = Conjunction(List(sw1,Negation(sw2))),
+        pre = sw1,
 
-        post = Conjunction(List(sw2,Negation(sw1))),
+        post = sw2,
 
         effects = List(
           EvolutionGrounding(s"mutex_${mutex_counter}_pos2",List(
@@ -201,7 +200,8 @@ class SPSCircuit (
         future = Conjunction(List(sw2,Negation(sw1)))
       )
 
-      list_of_actions = mutex_action_pos1 :: mutex_action_pos2 :: list_of_actions
+      list_of_actions = mutex_action_pos1 ::  list_of_actions
+      list_of_actions = mutex_action_pos2 :: list_of_actions
       mutex_counter += 1
     }
 
@@ -230,7 +230,6 @@ class SPSCircuit (
     nodes.foreach( n=> println(s"${n.node_string}; ") )
     loads.foreach( n=> println(s"${n.node_string} [shape=invtriangle,color=black]; ") )
     generators.foreach( n=> println(s"${n.node_string} [shape=box,color=red];") )
-
     //possible_failures.foreach( pf => println(s"${pf.source.node_string} -> ${pf.dest.node_string} [label=\"failure=${pf.id}\"];"))
     //switcher.foreach( s=> println(s"${s.source.node_string} -> ${s.dest.node_string} [label=\"switch=${s.id}\"];"))
 
@@ -241,7 +240,7 @@ class SPSCircuit (
 
     nodes.foreach( n=> println(s"${n.node_string}; ") )
     loads.foreach( n=> println(s"${n.node_string} [shape=invtriangle,color=black]; ") )
-    generators.foreach( n=> println(s"${n.node_string} [shape=box,color=red];") )
+    generators.foreach( n=> println(s"${n.node_string} [shape=circle,color=red];") )
 
     possible_failures.foreach( f => {
       val src: String = f.source.node_string
@@ -255,6 +254,13 @@ class SPSCircuit (
       val id: String = s.name
       println(src+" -> "+dst+"[label=\"switch="+id+"\",dir=none];")
     })
+    twowayselectors.foreach( ( n => {
+      println(s"TW${n.id}[shape=box]; ")
+      println(s"${n.middle.node_string} -> TW${n.id}; ")
+      println(s"${n.pos1.node_string} -> TW${n.id} [dir=none]; ")
+      println(s"${n.pos2.node_string} -> TW${n.id} [dir=none]; ")
+    }))
+
 
     println("}")
   }

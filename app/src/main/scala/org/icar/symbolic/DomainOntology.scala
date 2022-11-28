@@ -48,7 +48,7 @@ case class MixedCategory(override val name : String, individuals : List[Constant
 
 
 
-case class Axiom(consequent:Predicate, rhr:RuleAntecedent)
+case class Axiom(consequent:Predicate, rhr:RuleAntecedent)  // consequent => RuleCondition
 case class RuleAntecedent(and_terms:List[RuleCondition])
 
 abstract class RuleCondition

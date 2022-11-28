@@ -29,8 +29,16 @@ case class AbstractCapability(
 case class CapabilityParameter(variable : VariableTerm, category : String)
 
 
-case class CapabilityParameterEntry(variable : VariableTerm, value : ConstantTerm)
-case class CapabilityEntry(cap:AbstractCapability, pars : List[CapabilityParameterEntry])
+case class CapabilityParameterEntry(variable : VariableTerm, value : ConstantTerm) {
+  override def toString: String = {
+    variable.name+"="+value.toString
+  }
+}
+case class CapabilityEntry(cap:AbstractCapability, pars : List[CapabilityParameterEntry]) {
+  override def toString: String = {
+    cap.id+pars.mkString(",")
+  }
+}
 
 /** Class used for describing how an AbstractCapability modifies the current state of the world
  * The evolution represents the changes from W(t) to W(t+1) in terms of add/remove predicates

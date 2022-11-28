@@ -41,7 +41,11 @@ class ActionBuilder(val builder : SubLogicBuilder, repository : List[AbstractCap
     val pre_not_post = RawConj(raw_pre,RawNeg(raw_post))
     val raw_effects = convert_effects(cap.effects,map)
     val raw_future = builder.formula(cap.future.apply_substitution(map))
-    val action = RawAction(actions.size,pre_not_post,raw_effects,raw_future)
+
+    val id = actions.size
+    val name = id.toString+"."+cap.id+"("+assigned.mkString(",")+")"
+
+    val action = RawAction(id,name,pre_not_post,raw_effects,raw_future)
 
     actions = action :: actions
     action_register += (action.id -> entry)

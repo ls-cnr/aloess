@@ -14,7 +14,7 @@ case class WTSNode(id:Int, memory:Memory, score:Double) extends Ordered[WTSNode]
   override def toString: String = s"node $id score $score [${memory.stable_state}]"
 }
 
-case class WTSTransition(id:Int, origin : Int, destination : Int)
+case class WTSTransition(id:Int, name : String, origin : Int, destination : Int)
 
 
 

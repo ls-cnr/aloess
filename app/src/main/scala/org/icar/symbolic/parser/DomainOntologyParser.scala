@@ -43,6 +43,9 @@ class DomainOntologyParser extends JavaTokenParsers with FOLFormulaParserTrait {
   def axiom : Parser[Axiom] = "rule"~repsep(rule_condition,",")~"=>"~fol_predicate ^^ {
     case _~_ante~_~con => ob.axiom(con.asInstanceOf[Predicate],RuleAntecedent(_ante))
   }
+//  | "rule"~repsep(rule_condition,",")~"=>"~"rmv"~fol_predicate ^^ {
+//    case _~_ante~_~_~con => ob.axiom(NegateCondition(con.asInstanceOf[Predicate]),RuleAntecedent(_ante))
+//  }
 
   def rule_condition : Parser[RuleCondition] =
     "not"~fol_predicate ^^ {

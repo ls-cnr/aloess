@@ -1,8 +1,11 @@
 package org.icar.solver.best_first
 
 import org.icar.solver._
+import org.icar.subsymbolic.builder.ActionBuilder
+import org.icar.symbolic.CapabilityEntry
 
 case class WTSGraph(
+                     name : String,
                      start : WTSNode,
                      nodes : List[WTSNode],
                      transitions : List[WTSTransition],
@@ -16,16 +19,13 @@ case class WTSGraph(
 
 
   def stringGraphviz: String = {
-    var string = "digraph WTS {\n"
+    var string = s"digraph $name {\n"
     for (n <- nodes) {
       string += "\""+n.id+"\"[label=\""+n.memory.stable_state+"\"]\n"
     }
 
     for (t <- transitions) {
-      string += "\""+t.origin+"\""
-      string += "->"
-      string += "\""+t.destination+"\""
-      string += "[label=\""+tx_label(t.id).action_id+":"+tx_label(t.id).scenario_id+"\"];\n"
+      string += s"\"${t.origin}\" -> \"${t.destination}\" [label=\"${t.name}\"];\n"
     }
 
     string + "}\n"
@@ -41,6 +41,15 @@ case class WTSGraph(
       most_promising_node_according_score
     else
       most_promising_node_according_sat_degree
+  }
+  def manual_get_node(id: Int): Option[WTSNode] = {
+    var optnode : Option[WTSNode] = None
+
+    for (n<-nodes if !optnode.isDefined)
+      if (n.id == id)
+        optnode = Some(n)
+
+    optnode
   }
   def most_promising_node_according_score : Option[WTSNode] = {
     var result : Option[WTSNode] = None
@@ -86,13 +95,13 @@ case class WTSGraph(
    * 1) update the frontier data structure
    * 2) check if the wts represents a full solution
    */
-  def expand_wts(focusnode:WTSNode, exp_list: List[DecodeExpansion], goal_map_merger : GoalMapMerger, opt_metric : Option[DomainMetric]) : WTSGraph = {
+  def expand_wts(suffix:String,focusnode:WTSNode, exp_list: List[DecodeExpansion], goal_map_merger : GoalMapMerger, opt_metric : Option[DomainMetric]) : WTSGraph = {
     var up_nodes : List[WTSNode] = this.nodes
     var up_transitions : List[WTSTransition] = this.transitions
     var up_node_labels : Map[Int,NodeLabelling] = this.node_label
     var up_tx_labels : Map[Int,TxLabelling] = this.tx_label
     var up_frontier : List[WTSNode] = this.frontier.filter(x => x.id != focusnode.id)
-    var up_visited : List[WTSNode] = focusnode :: this.visited
+    val up_visited : List[WTSNode] = focusnode :: this.visited
 
     var up_wts_goal_map : Map[String,GoalState] = this.graph_label.wts_goals.map
 
@@ -114,13 +123,13 @@ case class WTSGraph(
     val up_quality_sol: Double = calculate_quality_of_solution(up_wts_goal_map)
     val up_graph_label = GraphLabelling(GoalModelMap( this.graph_label.wts_goals.root ,up_wts_goal_map),up_quality_sol)
 
-    WTSGraph(start,up_nodes,up_transitions,up_graph_label,up_node_labels,up_tx_labels,up_frontier,up_visited)
+    WTSGraph(name+suffix,start,up_nodes,up_transitions,up_graph_label,up_node_labels,up_tx_labels,up_frontier,up_visited)
   }
 
   def wts_without_node_in_frontier(focusnode:WTSNode) : WTSGraph = {
     val up_frontier : List[WTSNode] = this.frontier.filter(x => x.id != focusnode.id)
     val up_visited : List[WTSNode] = focusnode :: this.visited
-    WTSGraph(start,nodes,transitions,graph_label,node_label,tx_label,up_frontier,up_visited)
+    WTSGraph(name,start,nodes,transitions,graph_label,node_label,tx_label,up_frontier,up_visited)
   }
 
   def calculate_quality_of_solution(goal_map: Map[String, GoalState]): Double = {
@@ -135,6 +144,7 @@ object WTSGraph {
   def start_graph(start_node:WTSNode, init_goal_map : GoalModelMap) : WTSGraph = {
     val label = NodeLabelling(init_goal_map, List.empty)
     WTSGraph(
+      "wts0",
       start_node,
       List(start_node),
       List.empty,
