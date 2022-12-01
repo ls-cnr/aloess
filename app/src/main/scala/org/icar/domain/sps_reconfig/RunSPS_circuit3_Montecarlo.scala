@@ -20,17 +20,17 @@ object RunSPS_circuit3_Montecarlo extends App {
   val solver_result = solver.run(initial,TimeTermination(1000))//IterationTermination(400))//
   solver_result match {
     case FullSolutions(full, iterations, elapsed) =>
-    case PartialTree(tree_root, complete_solutions, best_partial, iterations, elapsed) =>
+      println("*** FULL SOLUTIONS ***")
+      full.foreach( x => println(x.stringGraphviz()))
+    case PartialTree(tree_root, best_partial, iterations, elapsed) =>
       val file = "app/src/main/resources/domain/sps_reconfig/mcs/tree.dot"
-      println(s"complete solutions = $complete_solutions")
-      if (best_partial.isDefined) {
-        println(s"partial solutions =>\n ${best_partial.get.back_sol_stringGraphviz()}")
-        println(best_partial.get.supervisor.stringGraphviz(goal_tree))
-      }
+      println("*** BEST PARTIAL SOLUTION ***")
+      println(best_partial.stringGraphviz())
       println(s"complete tree in file $file")
       val pw = new PrintWriter(new File(file))
       pw.write(tree_root.stringGraphviz())
       pw.close
     case SolverError(msg, iterations, elapsed) =>
+      println("*** ERROR ***")
   }
 }

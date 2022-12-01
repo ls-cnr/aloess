@@ -1,6 +1,6 @@
 package org.icar.solver.montecarlo
 
-import org.icar.solver.{AbstractSolver, PartialTree, SolverOutcome, TerminationCondition}
+import org.icar.solver.{AbstractSolver, FullSolutions, PartialTree, SolverError, SolverOutcome, TerminationCondition}
 import org.icar.symbolic.{AbstractCapability, DomainOntology, GoalTree, StateOfWorld}
 
 import scala.util.Random
@@ -73,7 +73,17 @@ class MonteCarloSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabili
 
     val end_timestamp: Long = System.currentTimeMillis
     val elapsed = end_timestamp - start_timestamp
-    PartialTree(tree.root, solution_nodes , best_partial_solution,  n_iteration, elapsed)
+
+    val converter = new WTSTree2Solution(sub_actions.action_register)
+    if (solution_nodes.nonEmpty) {
+      val solutions = for (s <- solution_nodes) yield converter.build_abstract(s)
+      FullSolutions(solutions,n_iteration,elapsed)
+    } else if (best_partial_solution.isDefined) {
+      val best_partial = converter.build_abstract(best_partial_solution.get)
+      PartialTree(tree.root, best_partial,  n_iteration, elapsed)
+    } else {
+      SolverError("Error",n_iteration, elapsed)
+    }
   }
 
   def simulation_until_delta(tree:WTSTreeBuilder, node: WTSTreeNode):WTSTreeNode = {

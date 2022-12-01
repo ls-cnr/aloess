@@ -9,6 +9,6 @@ abstract class SolverOutcome
 case class FullSolutions(full:List[AbstractWorkflow],iterations:Int,elapsed:Long) extends SolverOutcome
 case class PartialSolutions(partial:List[WTSGraph],iterations:Int,elapsed:Long) extends SolverOutcome
 
-case class PartialTree(tree_root:WTSTreeNode, solutions: List[WTSTreeNode], best_partial_solution : Option[WTSTreeNode], iterations:Int, elapsed:Long) extends SolverOutcome
+case class PartialTree(tree_root:WTSTreeNode, best_partial_solution : AbstractWorkflow, iterations:Int, elapsed:Long) extends SolverOutcome
 
 case class SolverError(msg:String,iterations:Int,elapsed:Long) extends SolverOutcome

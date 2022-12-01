@@ -7,7 +7,6 @@ import org.icar.subsymbolic.rete.Memory
 //todo: rename state --> memory, supervisor --> node_goals
 //todo: BestFirstSolver: mettere una unica RETE globale a livello di WTSGraph, come qui, potrebbe ridurre l'occupazione di memoria
 class WTSTreeNode(val id:Int, val parent:WTSTreeNode, val state : Memory, val supervisor : GoalModelMap, val legal_actions : Array[RawAction]/*,val r2s : Double*/) {
-
   val children : Array[Option[WTSTreeNode]] = Array.fill(legal_actions.length)(None)
   var visit : Int = 0     // number of visit received by the search algorithm
   var win : Double = 0    // score obtained by the various visits
@@ -21,6 +20,20 @@ class WTSTreeNode(val id:Int, val parent:WTSTreeNode, val state : Memory, val su
     val untried = for (index <- 0 until legal_actions.length if !children(index).isDefined) yield index
     untried.toArray
   }
+  def get_actionID_to(node: WTSTreeNode): Int = {
+    var index = -1
+    for (i <- 0 until children.size if children(i).isDefined) {
+      val child = children(i).get
+      if (child == node)
+        index = i
+    }
+    if (index != -1)
+      legal_actions(index).id
+    else
+      -1
+  }
+
+
 
   def back_sol_stringGraphviz() : String = {
     var string = "digraph solution {\n"
