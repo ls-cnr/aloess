@@ -96,6 +96,8 @@ class RETEBuilder(val builder : SubLogicBuilder, axioms : List[Axiom]) {
     else
       register_alpha_node(antecedents.head,assigned,pnode)
 
+    //note: this last instruction should be replaced by using dummy-beta-nodes
+    //i.e. a beta node that has only 1 predecessor and always has a token from the other side
   }
 
   /**

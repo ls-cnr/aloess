@@ -1,0 +1,7 @@
+capability "switch_off_gen" [
+  params: ?ID is gen_id
+  pre: on_gen(?ID)
+  post: not on_gen(?ID)
+  evolution "gen_off" : rmv on_gen(?ID)
+  future: not on_gen(?ID)
+]

@@ -1,0 +1,6 @@
+capability "register document" [
+  params: ?x is DOC_TYPE
+  pre: document(?x,received)
+  post: document(?x,registered)
+  evolution "received" : add document(?x,registered), rmv document(?x,received)
+]

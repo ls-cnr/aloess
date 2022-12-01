@@ -1,0 +1,6 @@
+capability "provide_cognitive_exercise" [
+    pre: user_location(living_room) and user_engagement(open_mind)
+    post: performed(cognitive_exercise)
+    evolution "perf. exercise" : add performed(cognitive_exercise)
+]
+      

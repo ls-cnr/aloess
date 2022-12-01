@@ -1,0 +1,7 @@
+capability "selector_pos2" [
+  params: ?ID is sel_id
+  pre: pos1_sel(?ID)
+  post: pos2_sel(?ID)
+  evolution "pos2" : add pos2_sel(?ID), rmv pos1_sel(?ID)
+  future: pos2_sel(?ID)
+]

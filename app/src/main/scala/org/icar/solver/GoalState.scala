@@ -81,6 +81,7 @@ case class GoalModelMap(root:String, map : Map[String,GoalState]) {
 }
 
 case class GoalState(internal_state: AchievementState, sat_state : GoalSatisfaction, sat_degree : Double, switch_to_committ:Boolean, switch_to_satisf:Boolean) {
+  def is_fully_sat : Boolean = sat_state.isInstanceOf[FullSatisfaction]
 }
 
 

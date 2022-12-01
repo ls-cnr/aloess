@@ -1,0 +1,12 @@
+domain "prova5" {
+    category ROOM atom [ bedroom, kitchen, living_room ]  
+    category ENGAGEMENT atom [ social, open_mind, passive, not_interested ]  
+    category ACTIVITY_TYPE atom [ social_activity, cognitive_exercise, entertainment, nothing ]  
+    category ENT_CONTENT atom [ selected, positive_reaction, neutral_reaction, negative_reaction ]  
+    define user_location(enum[ROOM]) 
+    define user_localization(atom[otherwise]) 
+    define user_engagement(enum[ENGAGEMENT]) 
+    define performed(enum[ACTIVITY_TYPE]) 
+    define entertainment_content(enum[ENT_CONTENT]) 
+    define activity_registered(atom[done]) 
+}

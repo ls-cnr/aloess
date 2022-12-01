@@ -1,0 +1,8 @@
+capability "switch_on_gen" [
+  params: ?ID is gen_id
+  pre: not on_gen(?ID)
+  post: on_gen(?ID)
+  evolution "gen_on" : add on_gen(?ID)
+  future: on_gen(?ID)
+]
+

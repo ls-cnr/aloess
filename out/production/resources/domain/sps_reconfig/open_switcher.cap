@@ -1,0 +1,7 @@
+capability "open_switcher" [
+  params: ?ID is free_sw_id
+  pre: closed_sw(?ID)
+  post: not closed_sw(?ID)
+  evolution "sw_off" : rmv closed_sw(?ID)
+  future: not closed_sw(?ID)
+]
