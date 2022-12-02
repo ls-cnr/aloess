@@ -1,7 +1,7 @@
 package org.icar.domain
 
 import org.icar.domain.sps_reconfig.RunSPS_sample_circuit_BestFistSolver.{solver, solver_result}
-import org.icar.solver.{FullSolutions, IterationTermination, PartialSolutions, SolverError}
+import org.icar.solver.{FullSolutions, IterationTermination, PartialTSWGraph, SolverError}
 import org.icar.solver.best_first.BestFirstSolver
 import org.icar.symbolic.builder.PropositionBuilder
 import org.icar.symbolic.parser.{AbstractCapabilityParser, DomainOntologyParser, GoalTreeParser}
@@ -55,7 +55,7 @@ object RunIDS_BestFistSolver extends App {
     case FullSolutions(full, iterations, elapsed) =>
       println(s"*** ${full.size} FULL SOLUTIONS ($elapsed ms, $iterations its) ***")
       full.foreach( s => println(s.stringGraphviz()) )
-    case PartialSolutions(partial, iterations, elapsed) =>
+    case PartialTSWGraph(partial, iterations, elapsed) =>
       println(s"*** ${solver.solution_set.size} PARTIAL SOLUTIONS ($elapsed ms, $iterations its) ***")
       println(solver.stringIterationGraphviz(6))
     case SolverError(msg, iterations, elapsed) =>

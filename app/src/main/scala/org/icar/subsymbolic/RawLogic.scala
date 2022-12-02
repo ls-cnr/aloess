@@ -83,22 +83,6 @@ case class RawNeg(op:RawLogicFormula) extends RawLogicFormula {
       case RawRelease(l,r) => RawUntil(RawNeg(l),RawNeg(r)).next(state_now)
       case RawFinally(o) => RawNeg(RawUntil(RawTT(),o)).next(state_now)
       case RawGlobally(o) => RawNeg(RawFinally(RawNeg(o))).next(state_now)
-
-//      // QUESTE SONO UNA RIPETIZIONE, SOPRA MANCA SOLO RawNeg
-//      case RawNeg(RawProposition(i)) => if (!RawProposition(i).satisfied_in(state_now)) RawFuture(false,RawFF()) else RawFuture(true,RawTT())
-//      case RawNeg(RawTT()) => RawFuture(false,RawFF())
-//      case RawNeg(RawFF()) => RawFuture(true,RawTT())
-//      case RawNeg(RawConj(l,r)) => RawDisj(RawNeg(l),RawNeg(r)).next(state_now)
-//      case RawNeg(RawDisj(l,r)) => RawConj(RawNeg(l),RawNeg(r)).next(state_now)
-//      case RawNeg(RawImpl(l,r)) => RawDisj(l,RawNeg(r)).next(state_now)
-//      case RawNeg(RawIff(l,r)) => RawIff(l,RawNeg(r)).next(state_now)
-//      case RawNeg(RawNext(o)) => RawNext(RawNeg(o)).next(state_now)
-//      case RawNeg(RawFinally(o)) => RawGlobally(RawNeg(o)).next(state_now)
-//      case RawNeg(RawGlobally(o)) => RawFinally(RawNeg(o)).next(state_now)
-//      case RawNeg(RawUntil(l,r)) => RawRelease(RawNeg(l),RawNeg(r)).next(state_now)
-//      case RawNeg(RawRelease(l,r)) => RawUntil(RawNeg(l),RawNeg(r)).next(state_now)
-//      case RawNeg(RawNeg(o)) => o.next(state_now)
-
       case _ => RawFuture(false,RawFF())
     }
   }

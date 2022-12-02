@@ -39,33 +39,12 @@ class EffortToSatisf(override val goal_node : GoalTree) extends DistanceToSatisf
     var sum: Double = 0
     for (g<-subgoals) sum += resistance_generic_node(g,goal_map,state)
     sum/subgoals.size
-
-
-//    val goal_state = goal_map(name)
-//    goal_state.internal_state match {
-//      case Completed() => 1
-//      case DependsOnSubgoals() =>
-//        var sum: Double = 0
-//        for (g<-subgoals) sum += resistance_generic_node(g,goal_map,state)
-//        sum/subgoals.size
-//      case _ =>0
-//    }
   }
   override def resistance_or_node(name:String, subgoals:List[GoalNode],goal_map : Map[String, GoalState], state : RawState): Double = {
     var smaller: Double = 0
 
     for (g<-subgoals) smaller = Math.min(smaller,resistance_generic_node(g,goal_map,state))
     smaller
-
-//    val goal_state = goal_map(name)
-//    goal_state.internal_state match {
-//      case Completed() =>1
-//      case DependsOnSubgoals() =>
-//        var smaller: Double = 0
-//        for (g<-subgoals) smaller = Math.min(smaller,resistance_generic_node(g,goal_map,state))
-//        smaller
-//      case _ => 0
-//    }
   }
   override def resistance_leaf_node(name:String,goal_map : Map[String, GoalState], state : RawState): Double = {
     val goal_state = goal_map(name)
@@ -114,26 +93,15 @@ class EffortToSatisf(override val goal_node : GoalTree) extends DistanceToSatisf
     val den : Double = rmax-rmin
     val r = num/den
     r
-    //(x-rmin)/(rmax-rmin)
   }
 
   private def normalize_ready(x:Double) : Double = {
     val norm = normalize(x)
     0.5 + (norm/2)
-//    val a : Double = rmin+((rmax-rmin)/2)
-//    val x_1 = Math.min(x+a, failure_value)
-//    normalize(x_1)
   }
   private def normalize_commit(x:Double) : Double = {
     val norm = normalize(x)
     norm/2
-
-//    val a : Double = rmin+((rmax-rmin)/2)
-//    val x_1 = x-a
-//    val num : Double = x-rmin
-//    val den : Double = a-rmin
-//    val r = num/den
-//    r
   }
 
 }

@@ -1,7 +1,7 @@
 package org.icar.domain
 
 import org.icar.domain.RunIDS_BestFistSolver.{solver, solver_result}
-import org.icar.solver.{FullSolutions, IterationTermination, PartialSolutions, SolverError}
+import org.icar.solver.{FullSolutions, IterationTermination, PartialTSWGraph, SolverError}
 import org.icar.solver.best_first.BestFirstSolver
 import org.icar.symbolic.StateOfWorld
 import org.icar.symbolic.builder.PropositionBuilder
@@ -76,7 +76,7 @@ object RunAAL4E_BestFistSolver extends App {
     case FullSolutions(full, iterations, elapsed) =>
       println(s"*** ${full.size} FULL SOLUTIONS ($elapsed ms, $iterations its) ***")
       full.foreach( s => println(s.stringGraphviz()) )
-    case PartialSolutions(partial, iterations, elapsed) =>
+    case PartialTSWGraph(partial, iterations, elapsed) =>
       println(s"*** ${solver.solution_set.size} PARTIAL SOLUTIONS ($elapsed ms, $iterations its) ***")
       println(solver.stringIterationGraphviz(6))
     case SolverError(msg, iterations, elapsed) =>

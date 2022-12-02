@@ -1,7 +1,7 @@
 package org.icar.domain.sps_reconfig
 
-import org.icar.solver.{FullSolutions, IterationTermination, PartialSolutions, PartialTree, SolverError, TimeTermination}
 import org.icar.solver.montecarlo.MonteCarloSolver
+import org.icar.solver.{FullSolutions, PartialTree, SolverError, TimeTermination}
 
 import java.io.{File, PrintWriter}
 

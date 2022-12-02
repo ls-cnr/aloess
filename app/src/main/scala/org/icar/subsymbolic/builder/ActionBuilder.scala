@@ -30,7 +30,7 @@ class ActionBuilder(val builder : SubLogicBuilder, repository : List[AbstractCap
       }
     }
   }
-  def register_action(cap: AbstractCapability, assigned: List[CapabilityParameterEntry]): Unit = {
+  private def register_action(cap: AbstractCapability, assigned: List[CapabilityParameterEntry]): Unit = {
     val entry = CapabilityEntry(cap,assigned)
 
     var map : Map[VariableTerm,ConstantTerm] = Map.empty

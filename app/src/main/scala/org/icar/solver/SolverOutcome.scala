@@ -7,7 +7,7 @@ import org.icar.symbolic.AbstractWorkflow
 abstract class SolverOutcome
 
 case class FullSolutions(full:List[AbstractWorkflow],iterations:Int,elapsed:Long) extends SolverOutcome
-case class PartialSolutions(partial:List[WTSGraph],iterations:Int,elapsed:Long) extends SolverOutcome
+case class PartialTSWGraph(partial:List[WTSGraph], iterations:Int, elapsed:Long) extends SolverOutcome
 
 case class PartialTree(tree_root:WTSTreeNode, best_partial_solution : AbstractWorkflow, iterations:Int, elapsed:Long) extends SolverOutcome
 

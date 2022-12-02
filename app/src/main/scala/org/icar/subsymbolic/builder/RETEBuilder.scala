@@ -9,9 +9,8 @@ class RETEBuilder(val builder : SubLogicBuilder, axioms : List[Axiom]) {
 
   init
 
-  def init : Unit = {
+  private def init : Unit = {
     for(rule <- axioms) {
-      //var func_list:List[Predicate] = List.empty
       var func_list:List[RuleCondition] = List.empty
       var var_types:Map[VariableTerm,ArgumentType] = Map.empty
 

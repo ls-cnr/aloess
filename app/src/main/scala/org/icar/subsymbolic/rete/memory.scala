@@ -1,6 +1,6 @@
 package org.icar.subsymbolic.rete
 
-import org.icar.subsymbolic.{RawAdd, RawEvoOperator, RawProposition, RawRem, RawState}
+import org.icar.subsymbolic.{RawAdd, RawEvoOperator, RawRem, RawState}
 
 case class Memory(
                    stable_state:RawState,

@@ -1,6 +1,6 @@
 package org.icar.domain.sps_reconfig
 
-import org.icar.solver.{FullSolutions, IterationTermination, PartialSolutions, SolverError}
+import org.icar.solver.{FullSolutions, IterationTermination, PartialTSWGraph, SolverError}
 import org.icar.solver.best_first.BestFirstSolver
 
 
@@ -45,7 +45,7 @@ object RunSPS_sample_circuit_BestFistSolver extends App {
     case FullSolutions(full, iterations, elapsed) =>
       println("*** FULL SOLUTIONS ***")
       full.foreach( s => println(s.stringGraphviz()) )
-    case PartialSolutions(partial, iterations, elapsed) =>
+    case PartialTSWGraph(partial, iterations, elapsed) =>
       println("*** 0 FULL SOLUTIONS ***")
       println(s"*** ${partial.size} PARTIAL SOLUTIONS ***")
       println(solver.stringIterationGraphviz(6))
@@ -73,7 +73,7 @@ object RunSPS_circuit3_BestFistSolver extends App {
     case FullSolutions(full, iterations, elapsed) =>
       println("*** FULL SOLUTIONS ***")
       full.foreach( s => println(s.stringGraphviz()) )
-    case PartialSolutions(partial, iterations, elapsed) =>
+    case PartialTSWGraph(partial, iterations, elapsed) =>
       println("*** 0 FULL SOLUTIONS ***")
       println(s"*** ${partial.size} PARTIAL SOLUTIONS ***")
     case SolverError(msg, iterations, elapsed) =>

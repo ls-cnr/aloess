@@ -41,7 +41,7 @@ class BestFirstSolver(onto:DomainOntology,abstract_repo : List[AbstractCapabilit
     if (compl_solutions.nonEmpty)
       FullSolutions(compl_solutions,n_iteration,elapsed)
     else {
-      PartialSolutions(solution_set,n_iteration,elapsed)
+      PartialTSWGraph(solution_set,n_iteration,elapsed)
       //SolverError("in-work",n_iteration,elapsed)
     }
   }

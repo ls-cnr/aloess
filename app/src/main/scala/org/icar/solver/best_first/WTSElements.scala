@@ -8,7 +8,7 @@ import scala.collection.immutable.TreeSet
 
 case class WTSNode(id:Int, memory:Memory, score:Double) extends Ordered[WTSNode] {
   //score is the quality of the node (higher is better)
-  // please, node: node equality must be done by explicitly comparing their ids
+  // please, note: node equality must be done by explicitly comparing their ids
   override def compare(that: WTSNode): Int = that.score compare this.score
 
   override def toString: String = s"node $id score $score [${memory.stable_state}]"
