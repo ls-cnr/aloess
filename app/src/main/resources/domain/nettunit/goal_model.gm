@@ -1,0 +1,6 @@
+model {
+    goal Managing_emergency is and [
+        goal send_team_to_evaluate when emergency_location(refinery) and not assessed_emergency() should ensure F alarm_state(attention)
+        goal do_crossborder_communication when alarm_state(alert) should ensure F crossborder_inform()
+    ]
+}

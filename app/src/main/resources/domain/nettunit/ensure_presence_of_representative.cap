@@ -1,0 +1,5 @@
+capability "ensure_presence_of_representative" [
+  pre: alarm_state(alert)
+  post: informed_authority(questor,alert)
+  evolution "ensure representative" : add informed_authority(questor,alert)
+]

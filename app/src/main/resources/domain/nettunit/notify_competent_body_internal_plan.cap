@@ -1,0 +1,5 @@
+capability "notify_competent_body_internal_plan" [
+  pre: internal_plan_active(active) and alarm_state(attention)
+  post: informed_authority(prefect,attention) and informed_authority(mayor,attention)
+  evolution "notify comp body" : add informed_authority(prefect,attention), add informed_authority(mayor,attention)
+]

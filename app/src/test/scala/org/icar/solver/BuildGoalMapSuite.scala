@@ -1,6 +1,7 @@
 package org.icar.solver
 
 import org.icar.domain.AAL4E
+import org.icar.partial_sat.EffortToSatisf
 import org.icar.subsymbolic._
 import org.icar.subsymbolic.builder.SubLogicBuilder
 import org.icar.symbolic.builder.PropositionBuilder

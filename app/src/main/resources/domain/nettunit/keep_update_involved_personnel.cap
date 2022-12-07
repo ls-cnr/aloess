@@ -1,0 +1,5 @@
+capability "keep_update_involved_personnel" [
+  pre: tech_report(fire,attention)
+  post: coordinated_firefighter_intervention() and second_explosion()
+  evolution "update personnel" : add coordinated_firefighter_intervention(), add second_explosion()
+]

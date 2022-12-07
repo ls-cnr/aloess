@@ -1,0 +1,25 @@
+domain "nettunit domain" {
+    category TARGET_LOCATION atom [ refinery, alt_location1, alt_location2 ]
+    category ALARM_STATE atom [ attention,pre_alert,alert ]
+    category AUTHORITY_ROLE atom [ prefect,mayor,questor,municipality ]
+    category COMPETENT_BODY_ROLE atom [ commander_fire_brigade, mayor, questor, n118, ASP, ARPA, civil_protection ]
+    category EVENT_TYPE atom [ fire, explosion, smoke_diffusion ]
+    category INTERNAL_PLAN_STATE atom [ active,over ]
+
+    define emergency_location(enum[TARGET_LOCATION])
+    define alarm_state(enum[ALARM_STATE])
+    define informed_authority(enum[AUTHORITY_ROLE],enum[ALARM_STATE])
+    define informed(enum[COMPETENT_BODY_ROLE],enum[ALARM_STATE])
+    define fire_brigade_assessment_done(enum[ALARM_STATE])
+    define internal_plan_active(enum[INTERNAL_PLAN_STATE])
+    define fire_extinguished()
+
+    define coordinated_firefighter_intervention()
+    define second_explosion()
+    define evaluated_fire_radiant_energy()
+    define crossborder_inform()
+    define assessed_emergency()
+
+    define tech_report(enum[EVENT_TYPE],enum[ALARM_STATE])
+    define notified_authorities(enum[ALARM_STATE])
+}

@@ -1,0 +1,5 @@
+capability "evaluate_fire_radiant_energy" [
+  pre: informed(ARPA,pre_alert) and alarm_state(pre_alert)
+  post: evaluated_fire_radiant_energy()
+  evolution "evaluate rad energy" : add evaluated_fire_radiant_energy()
+]

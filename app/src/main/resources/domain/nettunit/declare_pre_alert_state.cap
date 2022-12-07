@@ -1,0 +1,5 @@
+capability "declare_pre_alert_state" [
+  pre: coordinated_firefighter_intervention() and second_explosion()
+  post: alarm_state(pre_alert)
+  evolution "pre_alert" : add alarm_state(pre_alert)
+]

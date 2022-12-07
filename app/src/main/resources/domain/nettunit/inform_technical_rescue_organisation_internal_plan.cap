@@ -1,0 +1,5 @@
+capability "inform_technical_rescue_organisation_internal_plan" [
+  pre: internal_plan_active(active) and alarm_state(attention)
+  post: informed(commander_fire_brigade,attention)
+  evolution "notify fire_brigade" : add informed(commander_fire_brigade,attention)
+]

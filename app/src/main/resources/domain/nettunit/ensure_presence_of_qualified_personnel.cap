@@ -1,0 +1,5 @@
+capability "ensure_presence_of_qualified_personnel" [
+  pre: alarm_state(alert)
+  post: informed(civil_protection,alert) and informed_authority(municipality,alert)
+  evolution "ensure qualif personnel" : add informed(civil_protection,alert), add informed_authority(municipality,alert)
+]

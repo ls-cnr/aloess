@@ -1,0 +1,5 @@
+capability "send_team_to_evaluate" [
+  pre: emergency_location(refinery) and not assessed_emergency()
+  post: alarm_state(attention)
+  evolution "attention_state" : add alarm_state(attention)
+]

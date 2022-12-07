@@ -1,8 +1,7 @@
 package org.icar.domain
 
-import org.icar.domain.RunIDS_BestFistSolver.{solver, solver_result}
-import org.icar.solver.{FullSolutions, IterationTermination, PartialTSWGraph, SolverError}
 import org.icar.solver.best_first.BestFirstSolver
+import org.icar.solver.{FullSolutions, IterationTermination, PartialTSWGraph, SolverError}
 import org.icar.symbolic.StateOfWorld
 import org.icar.symbolic.builder.PropositionBuilder
 import org.icar.symbolic.parser.{AbstractCapabilityParser, DomainOntologyParser, GoalTreeParser}

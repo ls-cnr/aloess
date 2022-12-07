@@ -9,7 +9,7 @@ class WTSTree2Solution(action_register : Map[Int,CapabilityEntry]) {
   val start_event = StartEvent(1, "unique_end")
 
   var wfitems: Set[AbstractWorkflowItem] = Set(start_event,end_event)
-  var wfflow: List[SequenceFlow] = List.empty
+  var wfflow: List[AbstractSequenceFlow] = List.empty
 
   def build_abstract(leaf_node : WTSTreeNode) : AbstractWorkflow = {
     wfitems = Set(start_event,end_event)
@@ -40,8 +40,8 @@ class WTSTree2Solution(action_register : Map[Int,CapabilityEntry]) {
   }
 
   private def addSequenceFlow(from:AbstractWorkflowItem,to:AbstractWorkflowItem,scenario:String="",condition:LogicFormula with FOLNature =True()) : Unit = {
-    if (!wfflow.contains(SequenceFlow(from,to,scenario,condition))) {
-      wfflow = SequenceFlow(from,to,scenario,condition) :: wfflow
+    if (!wfflow.contains(AbstractSequenceFlow(from,to,scenario,condition))) {
+      wfflow = AbstractSequenceFlow(from,to,scenario,condition) :: wfflow
     }
   }
 

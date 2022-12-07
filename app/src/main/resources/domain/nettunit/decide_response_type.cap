@@ -1,0 +1,5 @@
+capability "decide_response_type" [
+  pre: informed(commander_fire_brigade,attention)
+  post: fire_brigade_assessment_done(attention)
+  evolution "fire_brigade assess" : add fire_brigade_assessment_done(attention)
+]

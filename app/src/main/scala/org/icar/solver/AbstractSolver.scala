@@ -1,5 +1,6 @@
 package org.icar.solver
 
+import org.icar.partial_sat.EffortToSatisf
 import org.icar.subsymbolic.builder.{ActionBuilder, RETEBuilder, SubLogicBuilder}
 import org.icar.symbolic._
 

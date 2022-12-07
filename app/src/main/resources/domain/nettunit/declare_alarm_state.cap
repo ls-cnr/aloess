@@ -1,0 +1,5 @@
+capability "declare_alarm_state" [
+  pre: evaluated_fire_radiant_energy() and alarm_state(pre_alert) and not fire_extinguished()
+  post: alarm_state(alert)
+  evolution "alert state" : add alarm_state(alert)
+]

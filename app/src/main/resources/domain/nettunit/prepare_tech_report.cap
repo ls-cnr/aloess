@@ -1,0 +1,5 @@
+capability "prepare_tech_report" [
+  pre: fire_brigade_assessment_done(attention)
+  post: tech_report(fire,attention)
+  evolution "fire_brigade report" : add tech_report(fire,attention)
+]

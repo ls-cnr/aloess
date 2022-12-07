@@ -1,0 +1,5 @@
+capability "activate_internal_security_plan" [
+  pre: alarm_state(attention)
+  post: internal_plan_active(active)
+  evolution "activate_internal_plan" : add internal_plan_active(active)
+]

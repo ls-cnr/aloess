@@ -1,5 +1,6 @@
 package org.icar.solver
 
+import org.icar.partial_sat.EffortToSatisf
 import org.icar.subsymbolic.builder.SubLogicBuilder
 import org.icar.symbolic.parser.{DomainOntologyParser, GoalTreeParser}
 import org.icar.symbolic._

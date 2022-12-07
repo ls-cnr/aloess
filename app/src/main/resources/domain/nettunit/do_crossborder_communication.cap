@@ -1,0 +1,5 @@
+capability "do_crossborder_communication" [
+  pre: alarm_state(alert)
+  post: crossborder_inform()
+  evolution "crossborder notification" : add crossborder_inform()
+]

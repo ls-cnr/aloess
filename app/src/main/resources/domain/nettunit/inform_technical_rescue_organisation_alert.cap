@@ -1,0 +1,5 @@
+capability "inform_technical_rescue_organisation_alert" [
+  pre: alarm_state(pre_alert)
+  post: informed(n118,pre_alert) and informed(ASP,pre_alert) and informed(ARPA,pre_alert)
+  evolution "inform pre-alert" : add informed(n118,pre_alert), add informed(ASP,pre_alert), add informed(ARPA,pre_alert)
+]

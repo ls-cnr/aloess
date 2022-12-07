@@ -6,7 +6,7 @@ class WTS2Solution(wts:WTSGraph, action_register : Map[Int,CapabilityEntry], I :
   val startEventID = 0
 
   var wfitems: Set[AbstractWorkflowItem] = Set(StartEvent(startEventID, s"start_${startEventID}"))
-  var wfflow: List[SequenceFlow] = List.empty
+  var wfflow: List[AbstractSequenceFlow] = List.empty
   var node_to_item_map:Map[WTSNode,AbstractWorkflowItem] = Map.empty
 
   var task_id=1; var split_id=1; var join_id=1; var end_id = 1
@@ -120,8 +120,8 @@ class WTS2Solution(wts:WTSGraph, action_register : Map[Int,CapabilityEntry], I :
   }
 
   private def addSequenceFlow(from:AbstractWorkflowItem,to:AbstractWorkflowItem,scenario:String="",condition:LogicFormula with FOLNature =True()) : Unit = {
-    if (!wfflow.contains(SequenceFlow(from,to,scenario,condition))) {
-      wfflow = SequenceFlow(from,to,scenario,condition) :: wfflow
+    if (!wfflow.contains(AbstractSequenceFlow(from,to,scenario,condition))) {
+      wfflow = AbstractSequenceFlow(from,to,scenario,condition) :: wfflow
     }
   }
 
